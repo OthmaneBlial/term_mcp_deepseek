@@ -28,7 +28,7 @@ This project is a prototype implementation of an MCP‑like server using the Dee
 
 - Python 3.8+
 - [pip](https://pip.pypa.io/)
-- A valid DeepSeek API key (set in `config.py`)
+- A valid DeepSeek API key
 
 ### Installation
 
