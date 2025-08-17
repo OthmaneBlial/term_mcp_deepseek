@@ -1,5 +1,6 @@
 # DeepSeek MCP-like Server for Terminal
 
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/OthmaneBlial/term_mcp_deepseek)](https://archestra.ai/mcp-catalog/othmaneblial__term_mcp_deepseek)
 This project is a prototype implementation of an MCP‑like server using the DeepSeek API. It aims to demonstrate the core concepts behind the Model Context Protocol (MCP) by exposing endpoints that allow AI assistants to:
  
 - List available tools.
