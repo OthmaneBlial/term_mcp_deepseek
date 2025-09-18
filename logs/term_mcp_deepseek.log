@@ -1,0 +1,603 @@
+2025-09-18 13:11:27,775 - root - INFO - Starting terminal+DeepSeek MCP server
+2025-09-18 13:11:27,775 - root - INFO - DeepSeek API Key configured: Yes
+2025-09-18 13:11:27,775 - root - INFO - MCP methods registered: tools/list, tools/call, prompts/list, prompts/get, resources/list, resources/read, roots/list
+2025-09-18 13:11:27,775 - root - INFO - Session management enabled
+2025-09-18 13:11:27,775 - root - INFO - Server starting on http://127.0.0.1:5000
+2025-09-18 13:11:27,776 - root - INFO - Session cleanup background task started
+2025-09-18 13:11:27,780 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-18 13:11:27,780 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-09-18 13:12:15,097 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:12:15,099 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:12:15,101 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:12:15] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:12:15,481 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:12:15,482 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:12:15,483 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:12:15] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:13:45,310 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:13:45,310 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:13:45,311 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:13:45] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:13:45,426 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:13:45,426 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:13:45,427 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:13:45] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:13:46,204 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:13:46,204 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:13:46,205 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:13:46] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:13:46,281 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:13:46,281 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:13:46,282 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:13:46] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:13:48,101 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:13:48,101 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:13:48,102 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:13:48] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:13:48,187 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:13:48,188 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:13:48,189 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:13:48] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:16:27,823 - root - INFO - Cleaned up expired sessions
+2025-09-18 13:18:12,238 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:18:12,239 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if hasattr(request, 'endpoint') and request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:18:12,240 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:18:12] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:18:12,363 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:18:12,364 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if hasattr(request, 'endpoint') and request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:18:12,364 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:18:12] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:18:13,702 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:18:13,702 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if hasattr(request, 'endpoint') and request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:18:13,704 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:18:13] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:18:13,772 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:18:13,772 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if hasattr(request, 'endpoint') and request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:18:13,773 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:18:13] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:18:15,218 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:18:15,219 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if hasattr(request, 'endpoint') and request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:18:15,219 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:18:15] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:18:15,305 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:18:15,305 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if hasattr(request, 'endpoint') and request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:18:15,305 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:18:15] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:18:21,389 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:18:21,389 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if hasattr(request, 'endpoint') and request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:18:21,390 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:18:21] "[35m[1mGET /auth.html HTTP/1.1[0m" 500 -
+2025-09-18 13:18:21,461 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:18:21,461 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+    if hasattr(request, 'endpoint') and request.endpoint in ['health_check', 'serve_chat', 'static']:
+NameError: name 'request' is not defined
+
+2025-09-18 13:18:21,462 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:18:21] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:19:45,909 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:19:45,910 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:19:45,913 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:19:45] "[35m[1mGET /chat.html HTTP/1.1[0m" 500 -
+2025-09-18 13:19:46,038 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:19:46,039 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:19:46,040 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:19:46] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:19:49,906 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:19:49,907 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:19:49,907 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:19:49] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:19:49,982 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:19:49,982 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:19:49,983 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:19:49] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:21:27,874 - root - INFO - Cleaned up expired sessions
+2025-09-18 13:26:27,975 - root - INFO - Cleaned up expired sessions
+2025-09-18 13:31:28,075 - root - INFO - Cleaned up expired sessions
+2025-09-18 13:36:28,175 - root - INFO - Cleaned up expired sessions
+2025-09-18 13:41:28,260 - root - INFO - Cleaned up expired sessions
+2025-09-18 13:41:36,247 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:41:36,248 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:41:36,248 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:41:36] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:41:36,444 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:41:36,445 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:41:36,445 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:41:36] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:45:12,352 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:12,352 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:12,353 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:12] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:45:12,507 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:12,508 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:12,508 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:12] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:45:13,631 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:13,632 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:13,633 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:13] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:45:13,693 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:13,694 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:13,694 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:13] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:45:47,363 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:47,364 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:47,364 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:47] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:45:47,511 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:47,512 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:47,513 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:47] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:45:56,903 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:56,903 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:56,905 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:56] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:45:56,979 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:56,980 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:56,980 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:56] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:45:58,071 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:58,072 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:58,072 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:58] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:45:58,139 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:58,140 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:58,140 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:58] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:45:59,275 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:59,275 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:59,276 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:59] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:45:59,354 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:45:59,354 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:45:59,355 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:59] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:46:00,485 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:46:00,486 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:46:00,487 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:46:00] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:46:00,569 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:46:00,569 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:46:00,570 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:46:00] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:46:33,195 - root - INFO - Cleaned up expired sessions
+2025-09-18 13:46:46,345 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:46:46,345 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:46:46,345 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:46:46] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:46:46,443 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:46:46,443 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:46:46,445 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:46:46] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:46:48,183 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:46:48,183 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:46:48,184 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:46:48] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:46:48,246 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:46:48,246 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:46:48,247 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:46:48] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:48:43,832 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:48:43,833 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:48:43,834 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:48:43] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:48:43,954 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:48:43,954 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:48:43,955 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:48:43] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:48:45,556 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:48:45,556 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:48:45,557 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:48:45] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:48:45,618 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:48:45,619 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:48:45,619 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:48:45] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:48:59,716 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:48:59,717 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:48:59,717 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:48:59] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:48:59,782 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:48:59,783 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:48:59,783 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:48:59] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:49:53,549 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:49:53,550 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:49:53,550 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:49:53] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:49:53,668 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:49:53,669 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:49:53,670 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:49:53] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:49:59,173 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:49:59,173 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:49:59,174 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:49:59] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:49:59,238 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:49:59,239 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:49:59,240 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:49:59] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:50:02,511 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:50:02,512 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:50:02,513 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:50:02] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 13:50:02,571 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 13:50:02,572 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 13:50:02,573 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 13:50:02] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 13:51:33,282 - root - INFO - Cleaned up expired sessions
+2025-09-18 13:56:33,382 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:00:02,468 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 14:00:02,468 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 14:00:02,469 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 14:00:02] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 14:00:02,604 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 14:00:02,604 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 14:00:02,605 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 14:00:02] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 14:00:03,516 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 14:00:03,516 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 14:00:03,517 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 14:00:03] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-09-18 14:00:03,590 - error_handler - ERROR - Flask error: name 'request' is not defined
+2025-09-18 14:00:03,591 - error_handler - ERROR - Traceback (most recent call last):
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1482, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "/home/othmane/Projects/term_mcp_deepseek/venv/lib/python3.10/site-packages/flask/app.py", line 1974, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "/home/othmane/Projects/term_mcp_deepseek/server.py", line 91, in security_check
+NameError: name 'request' is not defined
+
+2025-09-18 14:00:03,592 - werkzeug - INFO - 127.0.0.1 - - [18/Sep/2025 14:00:03] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-09-18 14:01:33,483 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:06:33,567 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:11:33,588 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:16:33,689 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:21:33,789 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:26:33,890 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:31:33,921 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:36:34,022 - root - INFO - Cleaned up expired sessions
+2025-09-18 14:41:34,108 - root - INFO - Cleaned up expired sessions
