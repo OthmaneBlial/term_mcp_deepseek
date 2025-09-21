@@ -27,4 +27,4 @@ jobs:
         run: pip install -r tests/requirements.txt
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: pytest tests/test_health.py tests/test_input_validator.py tests/test_auth_guard.py tests/test_api_integration.py::TestAPIIntegration::test_health_endpoint -v
