@@ -5,6 +5,13 @@ from unittest.mock import Mock
 from server import app as flask_app
 from config import Config
 
+# Add mocker fixture for pytest-mock
+@pytest.fixture
+def mocker():
+    """Mock fixture for pytest-mock"""
+    from pytest_mock import MockerFixture
+    return MockerFixture()
+
 @pytest.fixture
 def app():
     """Create and configure a test app instance."""

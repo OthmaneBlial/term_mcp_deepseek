@@ -1,8 +1,6 @@
 import pytest
-from server import app
 
-def test_stream_hello():
-    app.config['TESTING'] = True
+def test_stream_hello(app):
     client = app.test_client()
     # bypass auth by setting optional=True or inject a valid token
     rv = client.get("/stream?session_id=t1", headers={"Authorization":"Bearer testtoken"}, buffered=True)
