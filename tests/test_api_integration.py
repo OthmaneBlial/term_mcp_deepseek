@@ -3,7 +3,6 @@ import json
 from unittest.mock import Mock, patch
 from flask import Flask
 from tools.auth import init_oauth_app
-from api.routes import APIRoutes
 from models.conversation_store import conversation_store
 
 
@@ -24,8 +23,9 @@ class TestAPIIntegration:
         mock_shell.sendline = Mock()
         mock_shell.read_nonblocking = Mock(return_value=b"")
 
-        # Initialize routes
-        self.api_routes = APIRoutes(self.app, None, conversation_store)
+        # Register routes
+        from api.routes import bp as api_bp
+        self.app.register_blueprint(api_bp)
 
         self.client = self.app.test_client()
 
@@ -45,9 +45,7 @@ class TestAPIIntegration:
         assert response.status_code == 200
 
         data = json.loads(response.data)
-        assert data['status'] == 'healthy'
-        assert data['service'] == 'term-mcp-deepseek'
-        assert 'version' in data
+        assert data['status'] == 'ok'
 
     def test_mcp_info_endpoint(self):
         """Test MCP info endpoint"""

@@ -2,20 +2,42 @@ import pytest
 import os
 import tempfile
 from unittest.mock import Mock
-from server_new import create_app
-from config_new import Config
+from server import app as flask_app
+from config import Config
 
 @pytest.fixture
 def app():
     """Create and configure a test app instance."""
-    # Create a test config
-    class TestConfig(Config):
-        JWT_SECRET = "test_secret"
-        PORT = 5001
+    from flask import Flask
+    from config import config
+    import pexpect
 
-    app = create_app(TestConfig)
-    app.config['TESTING'] = True
-    return app
+    # Create a test app
+    test_app = Flask(__name__)
+    test_app.config.from_object(config)
+    test_app.config['TESTING'] = True
+    test_app.config['JWT_SECRET'] = "test_secret"
+
+    # Initialize OAuth
+    from tools.auth import init_oauth_app
+    test_app = init_oauth_app(test_app)
+
+    # Mock shell for testing
+    shell = pexpect.spawn('/bin/bash', encoding='utf-8', echo=False)
+
+    # Initialize MCP server
+    from mcp_server import MCPServer
+    test_app.mcp = MCPServer(shell)
+
+    # Initialize event bus
+    from models.event_bus import bus as event_bus
+    test_app.event_bus = event_bus
+
+    # Register routes
+    from api.routes import bp as api_bp
+    test_app.register_blueprint(api_bp)
+
+    return test_app
 
 
 @pytest.fixture

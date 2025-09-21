@@ -62,7 +62,7 @@ class TestInputValidator:
     def test_validate_session_id_invalid_chars(self):
         """Test session ID character validation"""
         with pytest.raises(ValueError, match="invalid characters"):
-            InputValidator.validate_session_id("abc@123")
+            InputValidator.validate_session_id("abc@123def456")
 
     def test_validate_control_character_valid(self):
         """Test validating valid control characters"""

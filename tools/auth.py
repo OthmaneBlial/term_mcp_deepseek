@@ -1,10 +1,20 @@
 # auth.py
 import time
+import secrets
 import typing as t
 from typing import Optional, Dict, Any
 from functools import wraps
-from flask import request, current_app, jsonify, abort
+from flask import request, current_app, jsonify, abort, g
 import jwt  # PyJWT
+
+# In-memory storage for tokens and clients
+TOKENS = {}
+CLIENTS = {
+    "mcp_client": {
+        "client_secret": "mcp_secret",
+        "scopes": ["read", "write"]
+    }
+}
 
 class JWTAuth:
     def __init__(self, secret: str, issuer: str = "term-mcp", audience: str = "term-mcp-clients"):

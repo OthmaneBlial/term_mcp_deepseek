@@ -13,7 +13,6 @@ import pexpect
 
 from config import config
 from mcp_server import MCPServer
-from api.routes import APIRoutes
 from models.conversation_store import conversation_store
 from tools.auth import init_oauth_app, require_auth
 from tools.json_rpc import JSONRPCServer
@@ -131,8 +130,9 @@ shell = pexpect.spawn('/bin/bash', encoding='utf-8', echo=False)
 # Initialize MCP server
 mcp_server = MCPServer(shell)
 
-# Initialize API routes
-api_routes = APIRoutes(app, mcp_server, conversation_store)
+# Register API routes
+from api.routes import bp as api_bp
+app.register_blueprint(api_bp)
 
 # Register error handlers
 @app.errorhandler(Exception)
