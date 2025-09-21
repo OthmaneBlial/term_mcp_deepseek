@@ -1,92 +1,827 @@
 <!DOCTYPE html>
-<html>
-
-<head>
+<html lang="en">
+  <head>
     <meta charset="utf-8" />
-    <title>DeepSeek Terminal Chat</title>
-    <!-- Minimal Tailwind from CDN -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>
+      Term MCP DeepSeek - AI Terminal
+      Assistant
+    </title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      .message-bubble {
+        max-width: 80%;
+        word-wrap: break-word;
+      }
+      .typing-indicator {
+        display: inline-block;
+      }
+      .typing-indicator span {
+        animation: typing 1.4s infinite
+          ease-in-out;
+      }
+      .typing-indicator
+        span:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+      .typing-indicator
+        span:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+      @keyframes typing {
+        0%,
+        80%,
+        100% {
+          opacity: 0;
+        }
+        40% {
+          opacity: 1;
+        }
+      }
+      .command-output {
+        background-color: #1a1a1a;
+        color: #f8f8f2;
+        font-family: "Monaco", "Menlo",
+          "Ubuntu Mono", monospace;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+      }
+      .error-message {
+        background-color: #fee2e2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+      }
+      .success-message {
+        background-color: #d1fae5;
+        border: 1px solid #a7f3d0;
+        color: #059669;
+      }
+      .info-message {
+        background-color: #dbeafe;
+        border: 1px solid #bfdbfe;
+        color: #2563eb;
+      }
+    </style>
+  </head>
 
-<body class="bg-gray-100 flex flex-col h-screen">
-    <header class="p-4 bg-white shadow flex-shrink-0">
-        <h1 class="text-2xl font-bold">DeepSeek Terminal Chat</h1>
-        <p class="text-sm text-gray-500">
-            Ask questions like "List files?" or "Check python version." The AI decides whether to run commands.
-        </p>
+  <body
+    class="bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col h-screen"
+  >
+    <!-- Header -->
+    <header
+      class="bg-white shadow-lg border-b border-gray-200 flex-shrink-0"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
+        <div
+          class="flex justify-between items-center py-4"
+        >
+          <div
+            class="flex items-center"
+          >
+            <i
+              class="fas fa-terminal text-2xl text-indigo-600 mr-3"
+            ></i>
+            <div>
+              <h1
+                class="text-2xl font-bold text-gray-900"
+              >
+                Term MCP DeepSeek
+              </h1>
+              <p
+                class="text-sm text-gray-500"
+              >
+                AI-powered terminal
+                assistant with MCP
+                protocol
+              </p>
+            </div>
+          </div>
+          <div
+            class="flex items-center space-x-4"
+          >
+            <div
+              id="connectionStatus"
+              class="flex items-center text-sm"
+            >
+              <div
+                class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"
+              ></div>
+              <span
+                class="text-gray-600"
+                >Connected</span
+              >
+            </div>
+            <div
+              id="sessionInfo"
+              class="text-sm text-gray-500"
+            >
+              Session:
+              <span id="sessionId"
+                >Loading...</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
     </header>
 
-    <main id="chatContainer" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+    <!-- Main Chat Area -->
+    <main
+      id="chatContainer"
+      class="flex-1 overflow-y-auto p-4 space-y-4 max-w-4xl mx-auto w-full"
+    >
+      <!-- Welcome Message -->
+      <div
+        class="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+      >
+        <div
+          class="flex items-start space-x-3"
+        >
+          <div class="flex-shrink-0">
+            <i
+              class="fas fa-robot text-2xl text-indigo-600"
+            ></i>
+          </div>
+          <div class="flex-1">
+            <h3
+              class="text-lg font-medium text-gray-900 mb-2"
+            >
+              Welcome to Term MCP
+              DeepSeek!
+            </h3>
+            <p
+              class="text-gray-600 mb-4"
+            >
+              I'm your AI terminal
+              assistant. I can help you
+              with:
+            </p>
+            <ul
+              class="list-disc list-inside text-gray-600 space-y-1 mb-4"
+            >
+              <li>
+                File and directory
+                operations
+              </li>
+              <li>
+                System information and
+                monitoring
+              </li>
+              <li>
+                Running terminal
+                commands safely
+              </li>
+              <li>
+                Process management
+              </li>
+              <li>
+                Real-time command
+                execution
+              </li>
+            </ul>
+            <div
+              class="bg-gray-50 rounded-lg p-3"
+            >
+              <p
+                class="text-sm text-gray-600"
+              >
+                <strong
+                  >Example
+                  commands:</strong
+                >
+                "List files", "Show
+                system info", "Check
+                disk usage", "Find large
+                files"
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
-    <form id="chatForm" class="bg-white p-4 border-t flex-shrink-0 flex gap-2">
-        <input type="text" id="chatInput" class="flex-1 border rounded px-2 py-2" placeholder="Ask something..."
-            required />
-        <button class="bg-blue-600 text-white px-4 py-2 rounded" type="submit">
-            Send
-        </button>
-    </form>
+    <!-- Message Input -->
+    <div
+      class="bg-white border-t border-gray-200 p-4 flex-shrink-0"
+    >
+      <div class="max-w-4xl mx-auto">
+        <form
+          id="chatForm"
+          class="flex space-x-3"
+        >
+          <div class="flex-1 relative">
+            <input
+              type="text"
+              id="chatInput"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 pr-12"
+              placeholder="Ask me anything about your terminal..."
+              required
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              id="clearButton"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Clear conversation"
+            >
+              <i
+                class="fas fa-trash-alt"
+              ></i>
+            </button>
+          </div>
+          <button
+            id="sendButton"
+            class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 flex items-center space-x-2"
+            type="submit"
+          >
+            <span id="sendText"
+              >Send</span
+            >
+            <i
+              class="fas fa-paper-plane"
+            ></i>
+          </button>
+        </form>
+
+        <!-- Typing Indicator -->
+        <div
+          id="typingIndicator"
+          class="hidden mt-3 flex items-center space-x-2"
+        >
+          <div class="flex space-x-1">
+            <div
+              class="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+            ></div>
+            <div
+              class="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+              style="
+                animation-delay: 0.1s;
+              "
+            ></div>
+            <div
+              class="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
+              style="
+                animation-delay: 0.2s;
+              "
+            ></div>
+          </div>
+          <span
+            class="text-sm text-gray-500"
+            >AI is thinking...</span
+          >
+        </div>
+
+        <!-- Error Display -->
+        <div
+          id="errorDisplay"
+          class="hidden mt-3 p-3 rounded-lg error-message"
+        >
+          <div
+            class="flex items-center space-x-2"
+          >
+            <i
+              class="fas fa-exclamation-triangle"
+            ></i>
+            <span id="errorText"></span>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
-        const chatContainer = document.getElementById('chatContainer');
-        const chatForm = document.getElementById('chatForm');
-        const chatInput = document.getElementById('chatInput');
+      // Global state
+      let currentSessionId = null
+      let messageHistory = []
+      let isTyping = false
 
-        // Helper to display user or server messages
-        function addMessage(role, text) {
-            const bubble = document.createElement('div');
-            bubble.classList.add('w-fit', 'max-w-full', 'p-3', 'rounded-lg', 'shadow-sm', 'break-words');
+      // DOM elements
+      const chatContainer =
+        document.getElementById(
+          "chatContainer"
+        )
+      const chatForm =
+        document.getElementById(
+          "chatForm"
+        )
+      const chatInput =
+        document.getElementById(
+          "chatInput"
+        )
+      const sendButton =
+        document.getElementById(
+          "sendButton"
+        )
+      const sendText =
+        document.getElementById(
+          "sendText"
+        )
+      const typingIndicator =
+        document.getElementById(
+          "typingIndicator"
+        )
+      const errorDisplay =
+        document.getElementById(
+          "errorDisplay"
+        )
+      const errorText =
+        document.getElementById(
+          "errorText"
+        )
+      const sessionIdElement =
+        document.getElementById(
+          "sessionId"
+        )
+      const clearButton =
+        document.getElementById(
+          "clearButton"
+        )
 
-            if (role === 'user') {
-                bubble.classList.add('bg-blue-500', 'text-white', 'self-end', 'rounded-br-none');
-                bubble.textContent = text;
-            } else {
-                bubble.classList.add('bg-gray-300', 'text-gray-900', 'self-start', 'rounded-bl-none');
-                bubble.innerHTML = escapeHTMLAndConvertNewlines(text);
-            }
+      // Initialize the application
+      async function initializeApp() {
+        try {
+          // Test connection
+          const healthResponse =
+            await fetch("/health")
+          if (!healthResponse.ok) {
+            throw new Error(
+              "Server connection failed"
+            )
+          }
 
-            chatContainer.appendChild(bubble);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+          // Get initial session
+          await createNewSession()
+
+          // Setup SSE for real-time updates
+          setupSSE()
+        } catch (error) {
+          showError(
+            "Failed to connect to server: " +
+              error.message
+          )
         }
+      }
 
-        // Convert <, >, & to HTML entities, and \n to <br>
-        function escapeHTMLAndConvertNewlines(str) {
-            return str
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\n/g, "<br>");
+      // Create new session
+      async function createNewSession() {
+        try {
+          const response =
+            await authenticatedFetch(
+              "/chat",
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  message: "Hello",
+                }),
+              }
+            )
+
+          if (response.ok) {
+            const data =
+              await response.json()
+            currentSessionId =
+              data.session_id
+            sessionIdElement.textContent =
+              currentSessionId.substring(
+                0,
+                8
+              ) + "..."
+          }
+        } catch (error) {
+          console.warn(
+            "Session creation failed:",
+            error
+          )
         }
+      }
 
-        async function sendMessage(msg) {
-            addMessage('user', msg);
-            chatInput.value = '';
+      // Setup Server-Sent Events
+      function setupSSE() {
+        if (!currentSessionId) return
 
+        const eventSource =
+          new EventSource(
+            `/stream?session_id=${currentSessionId}`
+          )
+
+        eventSource.onmessage =
+          function (event) {
             try {
-                let resp = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg })
-                });
-                let data = await resp.json();
-                if (data.message) {
-                    addMessage('assistant', data.message);
-                } else {
-                    addMessage('assistant', '(No response)');
-                }
-            } catch (err) {
-                addMessage('assistant', 'Error: ' + err);
+              const data = JSON.parse(
+                event.data
+              )
+              handleSSEEvent(data)
+            } catch (error) {
+              console.error(
+                "SSE parse error:",
+                error
+              )
             }
+          }
+
+        eventSource.onerror = function (
+          error
+        ) {
+          console.error(
+            "SSE error:",
+            error
+          )
+          showError(
+            "Real-time connection lost"
+          )
         }
 
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const val = chatInput.value.trim();
-            if (val) {
-                sendMessage(val);
-            }
-        });
-    </script>
-</body>
+        eventSource.onopen =
+          function () {
+            console.log(
+              "SSE connection opened"
+            )
+          }
+      }
 
+      // Handle SSE events
+      function handleSSEEvent(data) {
+        switch (data.type) {
+          case "command_start":
+            showTypingIndicator(
+              "Executing command: " +
+                data.command
+            )
+            break
+          case "command_complete":
+            hideTypingIndicator()
+            addCommandResult(
+              data.command,
+              data.output,
+              true
+            )
+            break
+          case "command_error":
+            hideTypingIndicator()
+            addCommandResult(
+              data.command,
+              data.error,
+              false
+            )
+            break
+          case "ping":
+            // Keep-alive ping
+            break
+          default:
+            console.log(
+              "Unknown SSE event:",
+              data
+            )
+        }
+      }
+
+      // Authenticated fetch wrapper
+      async function authenticatedFetch(
+        url,
+        options = {}
+      ) {
+        // For now, we'll assume authentication is handled server-side
+        // In production, you'd get and include auth tokens here
+        const defaultOptions = {
+          headers: {
+            "Content-Type":
+              "application/json",
+            ...options.headers,
+          },
+        }
+
+        return fetch(url, {
+          ...defaultOptions,
+          ...options,
+        })
+      }
+
+      // Add message to chat
+      function addMessage(
+        role,
+        content,
+        metadata = {}
+      ) {
+        const messageDiv =
+          document.createElement("div")
+        messageDiv.className = `flex ${
+          role === "user"
+            ? "justify-end"
+            : "justify-start"
+        } mb-4`
+
+        const bubble =
+          document.createElement("div")
+        bubble.className = `message-bubble p-4 rounded-lg shadow-sm ${
+          role === "user"
+            ? "bg-indigo-600 text-white rounded-br-sm"
+            : "bg-white text-gray-900 rounded-bl-sm border border-gray-200"
+        }`
+
+        if (metadata.isCommand) {
+          bubble.innerHTML = `
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fas fa-terminal text-xs"></i>
+                        <code class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">${
+                          metadata.command
+                        }</code>
+                    </div>
+                    <div class="command-output text-sm">${escapeHTML(
+                      content
+                    )}</div>
+                `
+        } else if (metadata.isError) {
+          bubble.className +=
+            " error-message"
+          bubble.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>${escapeHTML(
+                          content
+                        )}</span>
+                    </div>
+                `
+        } else {
+          bubble.innerHTML =
+            escapeHTMLAndConvertNewlines(
+              content
+            )
+        }
+
+        // Add timestamp
+        const timestamp =
+          document.createElement("div")
+        timestamp.className =
+          "text-xs text-gray-500 mt-1"
+        timestamp.textContent =
+          new Date().toLocaleTimeString()
+        bubble.appendChild(timestamp)
+
+        messageDiv.appendChild(bubble)
+        chatContainer.appendChild(
+          messageDiv
+        )
+
+        // Scroll to bottom
+        chatContainer.scrollTop =
+          chatContainer.scrollHeight
+
+        // Store in history
+        messageHistory.push({
+          role,
+          content,
+          metadata,
+          timestamp: Date.now(),
+        })
+      }
+
+      // Add command result
+      function addCommandResult(
+        command,
+        output,
+        success
+      ) {
+        addMessage(
+          "assistant",
+          output,
+          {
+            isCommand: true,
+            command: command,
+            success: success,
+          }
+        )
+      }
+
+      // Show typing indicator
+      function showTypingIndicator(
+        message = "AI is thinking..."
+      ) {
+        if (isTyping) return
+        isTyping = true
+        typingIndicator.querySelector(
+          "span"
+        ).textContent = message
+        typingIndicator.classList.remove(
+          "hidden"
+        )
+      }
+
+      // Hide typing indicator
+      function hideTypingIndicator() {
+        isTyping = false
+        typingIndicator.classList.add(
+          "hidden"
+        )
+      }
+
+      // Show error
+      function showError(message) {
+        errorText.textContent = message
+        errorDisplay.classList.remove(
+          "hidden"
+        )
+        setTimeout(() => {
+          errorDisplay.classList.add(
+            "hidden"
+          )
+        }, 5000)
+      }
+
+      // Hide error
+      function hideError() {
+        errorDisplay.classList.add(
+          "hidden"
+        )
+      }
+
+      // Send message
+      async function sendMessage(
+        message
+      ) {
+        if (!message.trim()) return
+
+        try {
+          hideError()
+          showTypingIndicator()
+
+          // Disable input while sending
+          chatInput.disabled = true
+          sendButton.disabled = true
+          sendText.textContent =
+            "Sending..."
+
+          const response =
+            await authenticatedFetch(
+              "/chat",
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  message:
+                    message.trim(),
+                }),
+              }
+            )
+
+          const data =
+            await response.json()
+
+          if (!response.ok) {
+            throw new Error(
+              data.error ||
+                `HTTP ${response.status}`
+            )
+          }
+
+          hideTypingIndicator()
+
+          // Update session ID if provided
+          if (
+            data.session_id &&
+            data.session_id !==
+              currentSessionId
+          ) {
+            currentSessionId =
+              data.session_id
+            sessionIdElement.textContent =
+              currentSessionId.substring(
+                0,
+                8
+              ) + "..."
+          }
+
+          // Add response to chat
+          if (data.message) {
+            addMessage(
+              "assistant",
+              data.message
+            )
+          }
+        } catch (error) {
+          hideTypingIndicator()
+          showError(
+            "Failed to send message: " +
+              error.message
+          )
+          console.error(
+            "Send error:",
+            error
+          )
+        } finally {
+          // Re-enable input
+          chatInput.disabled = false
+          sendButton.disabled = false
+          sendText.textContent = "Send"
+          chatInput.focus()
+        }
+      }
+
+      // Clear conversation
+      function clearConversation() {
+        if (
+          confirm(
+            "Are you sure you want to clear the conversation?"
+          )
+        ) {
+          // Keep only the welcome message
+          const welcomeMessage =
+            chatContainer.querySelector(
+              ".bg-white.rounded-lg.shadow-sm"
+            )
+          chatContainer.innerHTML = ""
+          if (welcomeMessage) {
+            chatContainer.appendChild(
+              welcomeMessage
+            )
+          }
+          messageHistory = []
+          currentSessionId = null
+          sessionIdElement.textContent =
+            "Cleared"
+          createNewSession()
+        }
+      }
+
+      // Utility functions
+      function escapeHTML(text) {
+        const div =
+          document.createElement("div")
+        div.textContent = text
+        return div.innerHTML
+      }
+
+      function escapeHTMLAndConvertNewlines(
+        str
+      ) {
+        return escapeHTML(str)
+          .replace(/\n/g, "<br>")
+          .replace(/\s/g, "&nbsp;")
+      }
+
+      // Event listeners
+      chatForm.addEventListener(
+        "submit",
+        (e) => {
+          e.preventDefault()
+          const message =
+            chatInput.value.trim()
+          if (message) {
+            addMessage("user", message)
+            chatInput.value = ""
+            sendMessage(message)
+          }
+        }
+      )
+
+      clearButton.addEventListener(
+        "click",
+        clearConversation
+      )
+
+      // Keyboard shortcuts
+      document.addEventListener(
+        "keydown",
+        (e) => {
+          if (
+            e.ctrlKey &&
+            e.key === "Enter"
+          ) {
+            e.preventDefault()
+            chatForm.dispatchEvent(
+              new Event("submit")
+            )
+          }
+        }
+      )
+
+      // Initialize on page load
+      document.addEventListener(
+        "DOMContentLoaded",
+        initializeApp
+      )
+
+      // Handle page visibility changes
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (document.hidden) {
+            // Page is hidden
+          } else {
+            // Page is visible again
+            chatInput.focus()
+          }
+        }
+      )
+    </script>
+  </body>
 </html>

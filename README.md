@@ -1,27 +1,42 @@
 # DeepSeek MCP-like Server for Terminal
 
 [![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/OthmaneBlial/term_mcp_deepseek)](https://archestra.ai/mcp-catalog/othmaneblial__term_mcp_deepseek)
-This project is a prototype implementation of an MCP‑like server using the DeepSeek API. It aims to demonstrate the core concepts behind the Model Context Protocol (MCP) by exposing endpoints that allow AI assistants to:
- 
+This project is an MCP‑like server using the DeepSeek API. It aims to demonstrate the core concepts behind the Model Context Protocol (MCP) by exposing endpoints that allow AI assistants to:
+
 - List available tools.
 - Invoke commands on an active shell session.
 - Integrate with an AI chat (DeepSeek) that can include special instructions (e.g., `CMD:` lines) to trigger command execution.
 
-> **Note:** While this implementation captures many of the MCP ideas, it is not yet a fully compliant MCP server as defined by Anthropic. It is designed as a proof-of-concept, and further enhancements (e.g., JSON‑RPC protocol support, real‑time updates via SSE, session management, and improved security) would be needed for production use.
+> **Note:** While this implementation captures many of the MCP ideas and includes features like real-time streaming, session management, and basic security, it is not yet a fully compliant MCP server as defined by Anthropic. It is designed as a proof-of-concept, and further enhancements (e.g., complete JSON‑RPC protocol support, advanced authentication, and comprehensive error handling) would be needed for production use.
 
 ## Features
 
-- **Chat Interface:**  
-  A simple web-based chat client (using Flask and Tailwind CSS) where users can interact with the server.
+- **Chat Interface:**
+  A modern web-based chat client (using Flask and Tailwind CSS) where users can interact with the server, now with real-time updates and improved error handling.
 
-- **AI Integration:**  
+- **AI Integration:**
   Uses the DeepSeek API to generate responses. The AI can instruct the server to execute terminal commands by including lines beginning with `CMD:`.
 
-- **Terminal Command Execution:**  
-  Executes shell commands via a persistent Bash session using the `pexpect` library and returns output to the client.
+- **Terminal Command Execution:**
+  Executes shell commands via a persistent Bash session using the `pexpect` library and returns output to the client, with added real-time streaming capabilities.
 
-- **MCP Endpoints:**  
-  Provides `/mcp/list_tools` and `/mcp/call_tool` endpoints that mimic MCP tool discovery and invocation.
+- **MCP Endpoints:**
+  Provides `/mcp/list_tools` and `/mcp/call_tool` endpoints that mimic MCP tool discovery and invocation, with expanded protocol support including prompts, resources, and roots.
+
+- **Real-time Streaming:**
+  Server-Sent Events (SSE) for live command execution updates and terminal output.
+
+- **Security Enhancements:**
+  Basic authentication, rate limiting, input validation, and security headers for safer operation.
+
+- **Multiple Transport Options:**
+  Supports both HTTP REST API and STDIO command-line interface for flexibility.
+
+- **Session Management:**
+  Improved session handling and conversation storage.
+
+- **Docker Support:**
+  Containerization for easier deployment and testing.
 
 ## Getting Started
 
@@ -59,13 +74,32 @@ This project is a prototype implementation of an MCP‑like server using the Dee
 
 ### Running the Server
 
+#### Quick Start
+
+Use the provided startup script for convenience:
+
+```bash
+chmod +x startup.sh
+./startup.sh
+```
+
+#### Manual Start
+
 Run the Flask server with:
 
 ```bash
 python server.py
 ```
 
-Visit [http://127.0.0.1:5000](http://127.0.0.1:5000) to access the chat interface.
+Visit [http://127.0.0.1:8000](http://127.0.0.1:8000) to access the chat interface.
+
+#### Docker
+
+For containerized deployment:
+
+```bash
+docker-compose up -d
+```
 
 ## Endpoints
 
@@ -73,7 +107,7 @@ Visit [http://127.0.0.1:5000](http://127.0.0.1:5000) to access the chat interfac
 - **URL:** `/chat`
 - **Method:** `POST`
 - **Payload:** `{ "message": "your message here" }`
-- **Description:**  
+- **Description:**
   Adds the user message to the conversation, sends it to the DeepSeek API, looks for any command instructions (`CMD:`), executes them, and returns the final response.
 
 ### MCP Endpoints
@@ -81,37 +115,41 @@ Visit [http://127.0.0.1:5000](http://127.0.0.1:5000) to access the chat interfac
 #### List Tools
 - **URL:** `/mcp/list_tools`
 - **Method:** `POST`
-- **Response:**  
+- **Response:**
   JSON listing available tools (e.g., `write_to_terminal`, `read_terminal_output`, `send_control_character`).
 
 #### Call Tool
 - **URL:** `/mcp/call_tool`
 - **Method:** `POST`
-- **Payload:**  
+- **Payload:**
   ```json
   {
     "name": "tool_name",
     "arguments": { ... }
   }
   ```
-- **Description:**  
+- **Description:**
   Directly invoke a tool command on the server.
+
+### Real-time Streaming
+- **URL:** `/stream?session_id=session_id`
+- **Method:** `GET`
+- **Description:** Server-Sent Events endpoint for real-time command output updates.
 
 ## Future Improvements
 
-- **Protocol Standardization:**  
+- **Protocol Standardization:**
   Implement JSON‑RPC for a more robust and standardized communication protocol.
 
-- **Real-time Communication:**  
+- **Real-time Communication:**
   Add Server‑Sent Events (SSE) or WebSockets for live command output streaming.
 
-- **Session & Security Enhancements:**  
+- **Session & Security Enhancements:**
   Introduce per‑user sessions, proper authentication, input sanitization, and comprehensive error handling.
 
-- **Modular Code Architecture:**  
+- **Modular Code Architecture:**
   Further separate API logic from business logic for better maintainability and scalability.
 
 ## License
 
 This project is open-source and available under the [MIT License](LICENSE).
-

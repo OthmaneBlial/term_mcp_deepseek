@@ -1,47 +1,215 @@
+"""
+Main MCP Server Application
+Entry point for the terminal MCP server with DeepSeek integration
+"""
+
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env
-load_dotenv()
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-
-import re
-import json
+import logging
+import logging.handlers
 import asyncio
 import requests
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, g
 import pexpect
 
-from tools.command_executor import CommandExecutor
-from tools.tty_output_reader import TtyOutputReader
-from tools.send_control_character import SendControlCharacter
-from tools.utils import sleep
+from config import config
+from mcp_server import MCPServer
+from api.routes import APIRoutes
+from models.conversation_store import conversation_store
+from tools.auth import init_oauth_app, require_auth
+from tools.json_rpc import JSONRPCServer
+from tools.error_handler import error_handler, MCPError
+from tools.rate_limiter import security_middleware, require_security_check
 
+# Setup logging
+def setup_logging():
+    """Setup comprehensive logging system"""
+    os.makedirs("logs", exist_ok=True)
+
+    logger = logging.getLogger()
+    logger.setLevel(getattr(logging, config.LOG_LEVEL))
+
+    # Remove existing handlers
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+
+    # File handler with rotation
+    file_handler = logging.handlers.RotatingFileHandler(
+        config.LOG_FILE,
+        maxBytes=config.LOG_MAX_BYTES,
+        backupCount=config.LOG_BACKUP_COUNT
+    )
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter(
+        '%(levelname)s - %(message)s'
+    ))
+
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+    return logger
+
+# Initialize logging
+logger = setup_logging()
+
+# Initialize Flask app
 app = Flask(__name__)
+app.config['SECRET_KEY'] = config.SECRET_KEY
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 
-#######################################
-# Global Shell + Conversation Storage
-#######################################
+# Add security and MCP headers
+@app.after_request
+def add_security_headers(response):
+    """Add security, MCP, and CORS headers to all responses"""
+    # MCP headers
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['X-MCP-Version'] = config.MCP_VERSION
+    response.headers['X-MCP-Transport'] = 'http'
+    response.headers['Cache-Control'] = 'no-cache'
 
-# A single shell session for demonstration
+    # CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+
+    # Security headers
+    security_headers = security_middleware.get_security_headers()
+    for header, value in security_headers.items():
+        response.headers[header] = value
+
+    return response
+
+# Apply security checks before processing requests
+@app.before_request
+def security_check():
+    """Apply security checks before processing requests"""
+    from flask import request as flask_request
+
+    # Skip security checks for health endpoint and static files
+    if hasattr(flask_request, 'endpoint') and flask_request.endpoint in ['health_check', 'serve_chat', 'static']:
+        return
+
+    # Apply security middleware
+    allowed, reason = security_middleware.check_rate_limits()
+    if not allowed:
+        security_middleware.log_security_event('rate_limit', {'reason': reason})
+        return {'error': reason}, 429
+
+    allowed, reason = security_middleware.check_request_size()
+    if not allowed:
+        security_middleware.log_security_event('request_size_exceeded', {'reason': reason})
+        return {'error': reason}, 413
+
+    allowed, reason = security_middleware.check_suspicious_content()
+    if not allowed:
+        security_middleware.log_security_event('suspicious_content', {'reason': reason})
+        return {'error': reason}, 400
+
+    # Store security info
+    g.client_ip = security_middleware.get_client_ip()
+    g.security_checks_passed = True
+
+# Handle OPTIONS requests for CORS
+@app.route('/mcp/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    response = app.response_class()
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+    return response
+
+# Initialize OAuth2
+app = init_oauth_app(app)
+
+# Global shell session
 shell = pexpect.spawn('/bin/bash', encoding='utf-8', echo=False)
 
-# We'll keep a conversation list in memory
-# (In real usage, you might store it per user, or in a DB.)
-# For DeepSeek, we need a "messages" array, each with {role, content}.
-# We'll start with a system message instructing the model how to run commands.
-conversation = [
-    {
-        "role": "system",
-        "content": (
-            "You are a helpful AI assistant with terminal access. "
-            "If you need to run a shell command to answer the user, include a line in your assistant message:\n"
-            "CMD: the_command_here\n\n"
-            "The server will intercept that line, run the command, and append the actual output to your final message. "
-            "Only use 'CMD:' if you truly need to run a command."
-        )
+# Initialize MCP server
+mcp_server = MCPServer(shell)
+
+# Initialize API routes
+api_routes = APIRoutes(app, mcp_server, conversation_store)
+
+# Register error handlers
+@app.errorhandler(Exception)
+def handle_exception(error):
+    return error_handler.handle_flask_error(error)
+
+@app.errorhandler(MCPError)
+def handle_mcp_error(error):
+    return error_handler.handle_flask_error(error)
+
+#######################################
+# Helper Functions
+#######################################
+async def run_shell_command(cmd: str) -> str:
+    """
+    2-step approach behind the scenes:
+     1) write_to_terminal => run the command
+     2) read_terminal_output => retrieve newly produced lines
+    Return the actual lines as a string
+    """
+    from tools.command_executor import CommandExecutor
+    from tools.tty_output_reader import TtyOutputReader
+    from tools.utils import sleep
+    import re
+
+    # We'll do it similarly to the 'call_tool' approach
+    executor = CommandExecutor(shell)
+
+    before_buffer = TtyOutputReader.get_buffer()
+    before_lines = len(before_buffer.split("\n"))
+
+    # run command
+    await executor.execute_command(cmd)
+
+    after_buffer = TtyOutputReader.get_buffer()
+    after_lines = len(after_buffer.split("\n"))
+    diff = after_lines - before_lines
+    # read new lines
+    lines_of_output = diff if diff > 0 else 25
+    new_output = TtyOutputReader.call(lines_of_output)
+
+    # Attempt to remove a trailing prompt line if present
+    last_line = new_output.strip().split("\n")[-1]
+    if re.search(r'(\$|%|#)\s*$', last_line):
+        # If the last line looks like a prompt, remove it
+        splitted = new_output.strip().split("\n")
+        splitted.pop()
+        new_output = "\n".join(splitted)
+    return new_output.strip() or "(No output)"
+
+def call_deepseek_api(messages):
+    """
+    Sends the conversation to DeepSeek. Returns the model's text.
+    For reference:
+      POST /chat/completions
+      {
+        "model": "deepseek-chat",
+        "messages": [ {role, content}, ... ],
+        "stream": false
+      }
+    With header "Authorization: Bearer <DEEPSEEK_API_KEY>"
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {config.DEEPSEEK_API_KEY}"
     }
-]
+    payload = {
+        "model": config.DEEPSEEK_MODEL,
+        "messages": messages,
+        "stream": False
+    }
+    resp = requests.post(config.DEEPSEEK_URL, headers=headers, json=payload, timeout=60)
+    resp.raise_for_status()
+    data = resp.json()
+    # DeepSeek might store the model's text in data["choices"][0]["message"]["content"]
+    return data["choices"][0]["message"]["content"]
+
 
 #######################################
 # Helper: run a command behind the scenes
@@ -113,211 +281,47 @@ def call_deepseek_api(messages):
     return data["choices"][0]["message"]["content"]
 
 
-#######################################
-# Chat Endpoint
-#######################################
-@app.route("/chat", methods=["POST"])
-def chat():
-    """
-    Accepts { "message": "...user text..." }
-    1) Add user message to conversation
-    2) Send conversation to DeepSeek
-    3) Parse for lines like "CMD: something"
-    4) For each command, run behind the scenes, inject the output into final text
-    5) Return the final text to the user
-    """
-    global conversation
-
-    data = request.json or {}
-    user_text = data.get("message", "").strip()
-    if not user_text:
-        return jsonify({"message": "(No user input)"}), 400
-
-    # 1) Add user message
-    conversation.append({"role": "user", "content": user_text})
-
-    # 2) Call DeepSeek
-    try:
-        assistant_text = call_deepseek_api(conversation)
-    except Exception as e:
-        err_msg = f"DeepSeek API error: {str(e)}"
-        # We'll add an assistant message with the error
-        conversation.append({"role": "assistant", "content": err_msg})
-        return jsonify({"message": err_msg})
-
-    # 3) Look for lines with "CMD: <stuff>"
-    # We'll do a multiline approach, so we can handle multiple commands if needed.
-    lines = assistant_text.split("\n")
-    final_text_lines = []
-    # We'll need an event loop for actual command runs
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    for line in lines:
-        if line.strip().startswith("CMD:"):
-            cmd = line.strip()[len("CMD:"):].strip()
-            if cmd:
-                # 4) run behind scenes
-                try:
-                    output = loop.run_until_complete(run_shell_command(cmd))
-                except Exception as exc:
-                    output = f"(Error running '{cmd}': {exc})"
-
-                # Insert the output after the command line
-                final_text_lines.append(f"(Ran: {cmd})\n{output}")
-            else:
-                # no command after "CMD:"
-                final_text_lines.append("(No command specified.)")
-        else:
-            # Normal text line
-            final_text_lines.append(line)
-
-    final_text = "\n".join(final_text_lines).strip()
-
-    # 5) Add the final text to conversation
-    conversation.append({"role": "assistant", "content": final_text})
-
-    # Return it to the user
-    return jsonify({"message": final_text})
-
-#######################################
-# Serve Chat Page
-#######################################
-@app.route("/")
-def serve_chat():
-    return send_from_directory("static", "chat.html")
 
 
-#######################################
-# MCP Endpoints remain if you need them
-#######################################
-@app.route('/mcp/list_tools', methods=['POST'])
-def list_tools():
-    return jsonify({
-        "tools": [
-            {
-                "name": "write_to_terminal",
-                "description": "Writes text to the active terminal session (like running a command).",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "command": {
-                            "type": "string",
-                            "description": "The command to run or text to write"
-                        }
-                    },
-                    "required": ["command"]
-                }
-            },
-            {
-                "name": "read_terminal_output",
-                "description": "Reads the output from the active terminal session",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "linesOfOutput": {
-                            "type": "number",
-                            "description": "How many lines from the bottom to read"
-                        }
-                    },
-                    "required": ["linesOfOutput"]
-                }
-            },
-            {
-                "name": "send_control_character",
-                "description": "Sends a control character to the active terminal (like Ctrl-C)",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "letter": {
-                            "type": "string",
-                            "description": "Letter for the control char (e.g. 'C' for Ctrl-C)"
-                        }
-                    },
-                    "required": ["letter"]
-                }
-            }
-        ]
-    })
 
-@app.route('/mcp/call_tool', methods=['POST'])
-def call_tool():
-    """
-    If you still want to do direct tool calls via cURL. 
-    This remains from earlier examples, no changes.
-    """
-    from tools.command_executor import CommandExecutor
 
-    data = request.json or {}
-    tool_name = data.get("name", "")
-    args = data.get("arguments", {})
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
 
-    if tool_name == "write_to_terminal":
-        command = str(args.get("command", ""))
-        if not command:
-            return jsonify({"error": "command is required"}), 400
+def cleanup_sessions():
+    """Background task to clean up expired sessions"""
+    import threading
+    import time
 
-        executor = CommandExecutor(shell)
+    def cleanup_worker():
+        while True:
+            time.sleep(300)  # Clean up every 5 minutes
+            try:
+                conversation_store.cleanup_expired_sessions()
+                logger.info("Cleaned up expired sessions")
+            except Exception as e:
+                logger.error(f"Error during session cleanup: {e}")
 
-        async def do_write():
-            before_buffer = TtyOutputReader.get_buffer()
-            before_lines = len(before_buffer.split("\n"))
-
-            await executor.execute_command(command)
-
-            after_buffer = TtyOutputReader.get_buffer()
-            after_lines = len(after_buffer.split("\n"))
-            diff = after_lines - before_lines
-
-            msg = (f"{diff} lines were output after sending the command to the terminal. "
-                   f"Read the last {diff} lines of terminal contents to orient yourself. "
-                   f"Never assume that the command was executed or that it was successful.")
-            return msg
-
-        result_msg = loop.run_until_complete(do_write())
-        return jsonify({
-            "content": [{
-                "type": "text",
-                "text": result_msg
-            }]
-        })
-
-    elif tool_name == "read_terminal_output":
-        lines_of_output = int(args.get("linesOfOutput", 25))
-        output = TtyOutputReader.call(lines_of_output)
-        return jsonify({
-            "content": [{
-                "type": "text",
-                "text": output
-            }]
-        })
-
-    elif tool_name == "send_control_character":
-        letter = str(args.get("letter", ""))
-        if not letter:
-            return jsonify({"error": "letter is required"}), 400
-
-        sender = SendControlCharacter(shell)
-        try:
-            sender.send(letter)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400
-
-        return jsonify({
-            "content": [{
-                "type": "text",
-                "text": f"Sent control character: Control-{letter.upper()}"
-            }]
-        })
-
-    else:
-        return jsonify({"error": f"Unknown tool '{tool_name}'"}), 400
-
+    # Start cleanup thread
+    cleanup_thread = threading.Thread(target=cleanup_worker, daemon=True)
+    cleanup_thread.start()
+    return cleanup_thread
 
 if __name__ == '__main__':
+    logger.info("Starting terminal+DeepSeek MCP server")
+    logger.info(f"DeepSeek API Key configured: {'Yes' if config.DEEPSEEK_API_KEY else 'No'}")
+    logger.info("MCP methods registered: tools/list, tools/call, prompts/list, prompts/get, resources/list, resources/read, roots/list")
+    logger.info("Session management enabled")
+    logger.info(f"Server starting on http://{config.HOST}:{config.PORT}")
+
     print("Starting terminal+DeepSeek server:")
-    print("  DEEPSEEK_API_KEY:", DEEPSEEK_API_KEY)
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    print("  DEEPSEEK_API_KEY:", "Configured" if config.DEEPSEEK_API_KEY else "Not configured")
+    print("  Logs will be written to:", config.LOG_FILE)
+    print(f"  Server will run on: http://{config.HOST}:{config.PORT}")
+    print("  Session management: Enabled")
+    print("  Authentication: OAuth2")
+
+    # Start session cleanup background task
+    cleanup_thread = cleanup_sessions()
+    logger.info("Session cleanup background task started")
+
+    app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)

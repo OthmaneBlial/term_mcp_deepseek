@@ -1,0 +1,39 @@
+# Git
+
+.git .gitignore
+
+# Python
+
+**pycache** _.pyc _.pyo _.pyd .Python env venv .venv pip-log.txt pip-delete-this-directory.txt .tox .coverage .coverage._ .pytest_cache nosetests.xml coverage.xml _.cover _.log .cache .mypy_cache
+
+# IDE
+
+.vscode .idea _.swp _.swo
+
+# OS
+
+.DS_Store Thumbs.db
+
+# Project specific
+
+logs/ _.log .env .env.local .env._.local
+
+# Build artifacts
+
+dist/ build/ \*.egg-info/
+
+# Documentation
+
+docs/\_build/ \*.md !README.md
+
+# Test files
+
+tests/ test\__.py _\_test.py
+
+# CI/CD
+
+.github/
+
+# Temporary files
+
+_.tmp _.temp
