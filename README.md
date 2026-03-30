@@ -9,6 +9,10 @@ This project is an MCP‑like server using the DeepSeek API. It aims to demonstr
 
 > **Note:** While this implementation captures many of the MCP ideas and includes features like real-time streaming, session management, and basic security, it is not yet a fully compliant MCP server as defined by Anthropic. It is designed as a proof-of-concept, and further enhancements (e.g., complete JSON‑RPC protocol support, advanced authentication, and comprehensive error handling) would be needed for production use.
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/othmaneblial-term-mcp-deepseek).
+
 ## Features
 
 - **Chat Interface:**
