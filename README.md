@@ -1,108 +1,180 @@
 # Term MCP DeepSeek
 
 [![CI](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/ci.yml/badge.svg)](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/ci.yml)
-[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/OthmaneBlial/term_mcp_deepseek)](https://archestra.ai/mcp-catalog/othmaneblial__term_mcp_deepseek)
+[![CodeQL](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/codeql.yml/badge.svg)](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/codeql.yml)
 
-A local, approval-first terminal copilot powered by DeepSeek, with one dual-era MCP dispatcher for HTTP and STDIO clients.
+**See the command, risk, workspace, and limits before anything runs. Then keep a signed receipt of what actually happened.**
 
-The current 0.9 line targets MCP `2026-07-28` and keeps `2025-11-25` handshake compatibility. It is designed for localhost and repository-scoped workspaces; confirm/trusted mode is not an operating-system sandbox for untrusted code.
+Term MCP DeepSeek is a local, approval-first terminal control plane for MCP clients and humans. It gives DeepSeek an isolated advisory role while deterministic policy owns command planning, approval, bounded execution, live events, and signed evidence.
 
-## Quick start
+![Term MCP DeepSeek approval-first mission control](docs/assets/mission-control.png)
 
-Requirements: Python 3.10 or newer and Bash.
+## Why this project
 
-    git clone https://github.com/OthmaneBlial/term_mcp_deepseek.git
-    cd term_mcp_deepseek
-    cp .env.example .env
-    ./startup.sh token
+Most terminal agents collapse suggestion and execution into one opaque moment. Term MCP DeepSeek makes the boundary visible:
 
-Copy the generated value into AUTH_TOKEN in ".env", then start the server:
+```text
+intent → versioned plan → policy decision → human approval → bounded process → signed receipt
+```
 
-    ./startup.sh
+- Model text never executes directly.
+- Inspect mode is read-only by default.
+- Every command is parsed without a shell and scoped to one workspace.
+- Pause, resume, cancel, timeout, output limits, and process isolation are first-class states.
+- DeepSeek can be absent or offline without disabling local MCP tools.
+- Receipts separate command, stdout, stderr, exit code, signal, permission, and signature.
+- Shareable exports remove command text, workspace paths, arguments, and output, then receive a new valid signature.
 
-The server listens on http://127.0.0.1:8000 by default.
+## First result in 60 seconds
 
-AUTH_TOKEN must contain at least 32 characters when provided. If it is omitted, `term-mcp serve` generates a strong ephemeral token and prints it once at startup. The DeepSeek key is optional for health checks, tool discovery, STDIO and local protocol tests. Add DEEPSEEK_API_KEY to ".env" only when using chat.
+Requirements: macOS or Linux, Python 3.10–3.13, and [pipx](https://pipx.pypa.io/).
 
-## One CLI
+```bash
+pipx install "git+https://github.com/OthmaneBlial/term_mcp_deepseek.git@main"
+cd /path/to/the/repository/you/want/to/inspect
+term-mcp serve
+```
 
-    term-mcp serve
-    term-mcp stdio
-    term-mcp doctor
-    term-mcp version
-    term-mcp token
+The server prints a one-time bearer token. Open [http://127.0.0.1:8000](http://127.0.0.1:8000), paste that token, choose **Inspect workspace**, then select **Build plan** and **Execute**.
 
-The compatibility files "server.py" and "stdio_server.py" delegate to this CLI; they do not contain separate server implementations.
+Expected result: the UI shows a low-risk `pwd` plan before execution, then a `succeeded` receipt with exit code `0`, separate stdout/stderr, and a verified HMAC signature. No DeepSeek key is required.
 
-## MCP compatibility
+Stop the server with `Ctrl+C`. The generated token and in-memory sessions disappear with the process.
 
-The full capability, transport, error, and tested-client matrix is in [docs/MCP_COMPATIBILITY.md](docs/MCP_COMPATIBILITY.md). The normal local integration is STDIO:
+## Install from a clone
+
+Use this path when contributing or testing unreleased changes:
+
+```bash
+git clone https://github.com/OthmaneBlial/term_mcp_deepseek.git
+cd term_mcp_deepseek
+./startup.sh token
+./startup.sh
+```
+
+`startup.sh` creates `.venv`, installs the package, and delegates to the same `term-mcp` CLI used by packaged installations.
+
+## Safety boundary
+
+The default is `APPROVAL_MODE=inspect` with network disabled.
+
+| Mode | Intended use | Writes | Project code | Approval |
+| --- | --- | --- | --- | --- |
+| `inspect` | Repository discovery | Blocked | Blocked | Long-running processes only |
+| `confirm` | Deliberate local work | Policy-scoped | Allowed by policy | Required for risky actions |
+| `trusted` | Pre-approved automation | Policy-scoped | Allowed by policy | Pre-approved, always receipted |
+
+Confirm and trusted modes are not an operating-system sandbox. Test untrusted repositories in a disposable container or VM. Keep `WORKSPACE_ROOT` narrow, `ALLOW_NETWORK=false`, and never expose the HTTP service directly to an untrusted network.
+
+Read [SECURITY.md](SECURITY.md) and the [threat model](docs/THREAT_MODEL.md) before enabling a wider command surface.
+
+## CLI
+
+```text
+term-mcp serve                       production HTTP server (Waitress)
+term-mcp serve --debug               Flask development server
+term-mcp stdio                       JSON-RPC over STDIO
+term-mcp doctor --json               config, permissions, shell, and transport checks
+term-mcp doctor --connectivity        optional DeepSeek endpoint check
+term-mcp demo                        no-key guided scenarios
+term-mcp receipt validate FILE       schema and HMAC validation
+term-mcp receipt show FILE           privacy-aware summary
+term-mcp token                       strong bearer token generator
+term-mcp version                     installed version
+```
+
+Run a complete local quality gate with:
+
+```bash
+./local_ci.sh
+```
+
+## MCP clients
+
+The server targets modern MCP `2026-07-28` and supports the legacy `2025-11-25` initialize lifecycle. HTTP and STDIO share one dispatcher and tool catalog.
+
+Recommended local STDIO configuration:
 
 ```json
 {
   "mcpServers": {
     "term-mcp-deepseek": {
-      "command": "/absolute/path/to/term_mcp_deepseek/.venv/bin/term-mcp",
+      "command": "/absolute/path/to/term-mcp",
       "args": ["stdio"],
-      "env": {"WORKSPACE_ROOT": "/absolute/path/to/your/project"}
+      "env": {
+        "WORKSPACE_ROOT": "/absolute/path/to/your/project",
+        "APPROVAL_MODE": "inspect"
+      }
     }
   }
 }
 ```
 
-## HTTP and web contract
+STDOUT contains JSON-RPC messages only; diagnostics go to STDERR. See the [MCP compatibility matrix](docs/MCP_COMPATIBILITY.md) for protocol details and dated client evidence.
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | /health | Readiness and package version |
-| GET | / | Local chat interface |
-| POST | /mcp | Modern or legacy MCP Streamable HTTP in JSON response mode |
-| DELETE | /mcp | Terminate a legacy MCP transport session |
-| POST | /sessions | Create an isolated web execution session (deprecated compatibility API) |
-| DELETE | /sessions/{id} | Close a session and cancel its process |
-| POST | /chat | DeepSeek planning chat; never executes text |
-| GET | /mcp/info | Declared capabilities and supported protocol versions |
-| GET | /stream?session_id=... | Web execution events (deprecated compatibility API, not MCP transport SSE) |
+## HTTP and web API
 
-Example tool discovery:
+Protected routes require `Authorization: Bearer $AUTH_TOKEN`. Public routes are intentionally limited to the UI shell, health, demos, static assets, and receipt schema.
 
-    curl http://127.0.0.1:8000/mcp \
-      -H "Authorization: Bearer $AUTH_TOKEN" \
-      -H "Accept: application/json, text/event-stream" \
-      -H "Content-Type: application/json" \
-      -H "MCP-Protocol-Version: 2026-07-28" \
-      -H "Mcp-Method: server/discover" \
-      -d '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"curl","version":"1"},"io.modelcontextprotocol/clientCapabilities":{}}}}'
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/health` | Public | Readiness and package version |
+| `GET` | `/` | Public | Approval-first mission control |
+| `GET` | `/demo/scenarios` | Public | No-key local demo catalog |
+| `GET` | `/schemas/receipt-1.0.json` | Public | Receipt JSON Schema |
+| `POST` | `/mcp` | Bearer | Modern or legacy MCP calls |
+| `DELETE` | `/mcp` | Bearer | Close a legacy MCP transport session |
+| `GET` | `/mcp/info` | Bearer | Runtime, limits, model, and protocol information |
+| `POST` | `/sessions` | Bearer | Create an isolated web execution session |
+| `DELETE` | `/sessions/{id}` | Bearer | Close a web session and stop its process |
+| `GET` | `/stream?session_id=...` | Bearer | Session-scoped execution events |
+| `POST` | `/chat` | Bearer | Advisory DeepSeek text; never execution |
+| `POST` | `/receipts/validate` | Bearer | Validate schema and local signature |
+| `POST` | `/receipts/redact` | Bearer | Remove private content and re-sign for sharing |
 
-## STDIO contract
-
-STDOUT contains JSON-RPC responses only; diagnostics are written to STDERR.
-
-    printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"stdio-smoke","version":"1"},"io.modelcontextprotocol/clientCapabilities":{}}}}' \
-      | python -m term_mcp_deepseek stdio
-
-HTTP and STDIO use the same dispatcher and business methods. STDIO is authorized by the parent process and does not require the HTTP bearer token.
+The `/sessions`, `/stream`, and `/chat` routes are web compatibility APIs, not separate MCP transports.
 
 ## Docker
 
-    AUTH_TOKEN=replace-with-a-strong-token docker compose up --build
+The image uses a pinned Python base, builds wheels in a separate stage, installs without network in the runtime stage, and runs as UID/GID `10001`.
 
-The container and health check use port 8000. The repository is mounted read-write at "/workspace" in the development compose profile.
+```bash
+export AUTH_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+docker compose up --build
+```
 
-## Development
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000). The compose workspace mount is read-only because the default mode is inspect. Stop with `docker compose down`.
 
-    ./local_ci.sh
+## Configuration
 
-The local CI command installs the project with development dependencies, checks formatting and lint, then runs the complete test suite with measured coverage.
+The no-key defaults are enough for local inspection. Copy `.env.example` only when persistent configuration is useful:
 
-## Project direction
+```bash
+cp .env.example .env
+term-mcp token
+term-mcp doctor
+```
 
-The full, dependency-ordered plan is in [ROADMAP.md](ROADMAP.md). The central product flow is:
+Do not commit `.env`. Add `DEEPSEEK_API_KEY` only for the optional advisor panel. The complete variable reference and deployment/rollback guidance are in [operations](docs/OPERATIONS.md).
 
-    plan → risk analysis → approval → bounded execution → receipt
+## Project map
 
-The current terminal flow never executes model text. Call `terminal_plan` first; it creates an execution session when one is not supplied. Use `terminal_approve` when required, then `terminal_execute`. Commands are parsed without a shell, constrained to the configured workspace, bounded by time and output limits, and recorded as signed redacted receipts.
+| Area | Source of truth |
+| --- | --- |
+| Product and trust boundaries | [Architecture](docs/ARCHITECTURE.md) |
+| Supported and unsupported behavior | [Feature matrix](docs/FEATURES.md) |
+| MCP versions and clients | [Compatibility](docs/MCP_COMPATIBILITY.md) |
+| Deployment and rollback | [Operations](docs/OPERATIONS.md) |
+| Security assumptions | [Security policy](SECURITY.md) and [threat model](docs/THREAT_MODEL.md) |
+| Direction and acceptance criteria | [Roadmap](ROADMAP.md) |
+| Release history | [Changelog](CHANGELOG.md) |
+
+## Contributing
+
+Small tests, protocol fixtures, safe recipes, accessibility improvements, and client compatibility reports are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), run `./local_ci.sh`, and include a redacted receipt when a terminal-execution bug produces one.
+
+Security vulnerabilities belong in GitHub private vulnerability reporting, never in a public issue.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).

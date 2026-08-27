@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security report
+    url: https://github.com/OthmaneBlial/term_mcp_deepseek/security/advisories/new
+    about: Report vulnerabilities without exposing details publicly.
+  - name: Usage and architecture documentation
+    url: https://github.com/OthmaneBlial/term_mcp_deepseek/tree/main/docs
+    about: Check setup, operations, protocol, and trust-boundary guidance first.

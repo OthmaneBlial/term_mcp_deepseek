@@ -2,24 +2,94 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  quality-and-tests:
+  quality:
+    name: Format and lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
-      - run: python -m pip install --upgrade pip
       - run: python -m pip install --editable ".[dev]"
       - run: python -m ruff format --check .
       - run: python -m ruff check .
+
+  tests:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - run: python -m pip install --editable ".[test]"
       - run: python -m pytest
+
+  package:
+    name: Clean wheel and source archive
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --editable ".[dev]"
+      - run: ./scripts/release_check.sh "$RUNNER_TEMP/release-dist"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: term-mcp-deepseek-dist
+          path: ${{ runner.temp }}/release-dist/*
+          if-no-files-found: error
+
+  docker:
+    name: Docker build and health
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build image
+        run: docker build --tag term-mcp-deepseek:ci .
+      - name: Verify non-root runtime and HTTP assets
+        run: |
+          set -euo pipefail
+          docker run --rm --detach \
+            --name term-mcp-deepseek-ci \
+            --publish 8000:8000 \
+            --env AUTH_TOKEN=ci-token-that-is-longer-than-thirty-two-characters \
+            --env ALLOWED_ORIGINS=http://127.0.0.1:8000 \
+            term-mcp-deepseek:ci
+          trap 'docker logs term-mcp-deepseek-ci || true; docker stop term-mcp-deepseek-ci || true' EXIT
+          test "$(docker inspect --format '{{.Config.User}}' term-mcp-deepseek-ci)" = "10001:10001"
+          for attempt in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8000/health >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8000/health | python -m json.tool
+          curl --fail --silent http://127.0.0.1:8000/ | grep --fixed-strings "Approval-first mission control"
+          curl --fail --silent http://127.0.0.1:8000/schemas/receipt-1.0.json | python -m json.tool >/dev/null
+          docker stop --time 10 term-mcp-deepseek-ci
+          trap - EXIT

@@ -1,0 +1,76 @@
+name: Bug report
+description: Reproducible runtime, protocol, policy, UI, or packaging problem
+title: "bug: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include secrets or private output. Use a redacted receipt when available. Report vulnerabilities privately through SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: term-mcp version
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Surface
+      options:
+        - STDIO modern MCP
+        - STDIO legacy MCP
+        - HTTP modern MCP
+        - HTTP legacy MCP
+        - Web mission control
+        - CLI or packaging
+        - Docker
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: macOS/Linux, OS version, Python version, client and version
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Approval mode
+      options: [inspect, confirm, trusted, not applicable]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the smallest safe sequence that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: receipt
+    attributes:
+      label: Redacted receipt or structured error
+      render: json
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed tokens, private paths, private output, and personal data.
+          required: true
+        - label: This is not a vulnerability report.
+          required: true

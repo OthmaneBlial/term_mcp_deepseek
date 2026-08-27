@@ -185,7 +185,6 @@ def stream():
     headers = {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
         "X-Accel-Buffering": "no",  # Nginx
     }
     response = Response(generate(), headers=headers)

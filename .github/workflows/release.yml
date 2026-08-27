@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Validate tag and install release tools
+        run: |
+          PACKAGE_VERSION="$(python -c 'from term_mcp_deepseek._version import VERSION; print(VERSION)')"
+          test "$GITHUB_REF_NAME" = "v$PACKAGE_VERSION"
+          python -m pip install --editable ".[dev]"
+      - name: Run exact-tag release check
+        run: ./scripts/release_check.sh "$RUNNER_TEMP/release-dist"
+      - uses: actions/attest@v4
+        with:
+          subject-path: ${{ runner.temp }}/release-dist/*
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ github.ref_name }}
+          path: ${{ runner.temp }}/release-dist/*
+          if-no-files-found: error
+      - name: Create immutable GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/release-dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Term MCP DeepSeek $GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag

@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a focused product, protocol, policy, recipe, or documentation improvement
+title: "proposal: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What concrete workflow is difficult today?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe the result, not only an implementation.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [product UX, protocol, security policy, execution, receipts, client integration, recipe, documentation, packaging]
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Trust-boundary impact
+      description: Does this add commands, files, network, credentials, persistence, or external communication?
+    validations:
+      required: true
+  - type: textarea
+    id: proof
+    attributes:
+      label: Acceptance proof
+      description: How could a test or demo prove this works safely?
+    validations:
+      required: true
