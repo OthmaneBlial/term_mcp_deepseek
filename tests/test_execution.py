@@ -125,14 +125,50 @@ def test_session_event_queues_are_isolated(tmp_path):
     first = service.create_session()["session_id"]
     second = service.create_session()["session_id"]
 
+    first_subscriber, first_queue = service.event_bus.subscribe(first)
+    second_subscriber, second_queue = service.event_bus.subscribe(second)
     first_plan = service.plan(first, "pwd")
     second_plan = service.plan(second, "ls")
-    first_event = service.event_bus.get(first).get_nowait()
-    second_event = service.event_bus.get(second).get_nowait()
+    first_event = first_queue.get_nowait()
+    second_event = second_queue.get_nowait()
 
     assert first_event["plan"]["id"] == first_plan.id
     assert second_event["plan"]["id"] == second_plan.id
     assert first_event["plan"]["session_id"] != second_event["plan"]["session_id"]
+    service.event_bus.unsubscribe(first, first_subscriber)
+    service.event_bus.unsubscribe(second, second_subscriber)
+    assert service.event_bus.subscriber_count(first) == 0
+
+
+def test_execution_can_pause_resume_cancel_and_replan(tmp_path):
+    service, _audit, _path = make_service(tmp_path, mode=ApprovalMode.INSPECT, timeout=5)
+    session_id = service.create_session()["session_id"]
+    plan = service.plan(session_id, "sleep 3")
+    assert plan.preview["max_duration_seconds"] == 5
+    assert plan.preview["risk"] == "medium"
+    service.approve(session_id, plan.id)
+    result = {}
+
+    thread = threading.Thread(
+        target=lambda: result.setdefault("receipt", service.execute(session_id, plan.id))
+    )
+    thread.start()
+    for _attempt in range(100):
+        if service.sessions.get(session_id).active_process is not None:
+            break
+        time.sleep(0.01)
+
+    assert service.pause(session_id) is True
+    assert plan.status is PlanStatus.PAUSED
+    assert service.resume(session_id) is True
+    assert plan.status is PlanStatus.RUNNING
+    assert service.cancel(session_id) is True
+    thread.join(timeout=2)
+
+    assert result["receipt"].status is PlanStatus.CANCELLED
+    retry = service.replan(session_id, plan.id)
+    assert retry.id != plan.id
+    assert retry.command == plan.command
 
 
 def test_redactor_removes_known_and_labeled_secrets():

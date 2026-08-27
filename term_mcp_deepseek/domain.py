@@ -31,6 +31,7 @@ class PlanStatus(str, Enum):
     BLOCKED = "blocked"
     APPROVED = "approved"
     RUNNING = "running"
+    PAUSED = "paused"
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     CANCELLED = "cancelled"
@@ -59,6 +60,7 @@ class ExecutionPlan:
     mode: ApprovalMode
     decision: PolicyDecision
     limits: dict[str, int | float]
+    preview: dict[str, Any]
     id: str = field(default_factory=lambda: str(uuid4()))
     schema_version: str = "1.0"
     status: PlanStatus = PlanStatus.PLANNED
@@ -82,6 +84,7 @@ class ExecutionPlan:
             "approved_at": self.approved_at,
             "policy": self.decision.to_dict(),
             "limits": self.limits,
+            "preview": self.preview,
         }
 
 

@@ -34,6 +34,10 @@ class Settings:
     deepseek_api_key: str = ""
     deepseek_model: str = "deepseek-chat"
     deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_timeout: float = 20.0
+    deepseek_max_retries: int = 2
+    deepseek_backoff: float = 0.25
+    deepseek_max_tokens: int = 1024
     mcp_version: str = "2026-07-28"
     workspace_root: str = "."
     auth_token: str = ""
@@ -71,6 +75,14 @@ class Settings:
             deepseek_api_key=source.get("DEEPSEEK_API_KEY", ""),
             deepseek_model=source.get("DEEPSEEK_MODEL", cls.deepseek_model),
             deepseek_base_url=source.get("DEEPSEEK_BASE_URL", cls.deepseek_base_url),
+            deepseek_timeout=float(source.get("DEEPSEEK_TIMEOUT", str(cls.deepseek_timeout))),
+            deepseek_max_retries=int(
+                source.get("DEEPSEEK_MAX_RETRIES", str(cls.deepseek_max_retries))
+            ),
+            deepseek_backoff=float(source.get("DEEPSEEK_BACKOFF", str(cls.deepseek_backoff))),
+            deepseek_max_tokens=int(
+                source.get("DEEPSEEK_MAX_TOKENS", str(cls.deepseek_max_tokens))
+            ),
             mcp_version=source.get("MCP_VERSION", cls.mcp_version),
             workspace_root=str(Path(source.get("WORKSPACE_ROOT", ".")).resolve()),
             auth_token=source.get("AUTH_TOKEN", ""),
@@ -117,6 +129,14 @@ class Settings:
             errors.append("COMMAND_TIMEOUT must be greater than zero")
         if self.max_output_bytes < 1024:
             errors.append("MAX_OUTPUT_BYTES must be at least 1024")
+        if self.deepseek_timeout <= 0:
+            errors.append("DEEPSEEK_TIMEOUT must be greater than zero")
+        if not 0 <= self.deepseek_max_retries <= 5:
+            errors.append("DEEPSEEK_MAX_RETRIES must be between 0 and 5")
+        if self.deepseek_backoff < 0:
+            errors.append("DEEPSEEK_BACKOFF cannot be negative")
+        if not 1 <= self.deepseek_max_tokens <= 8192:
+            errors.append("DEEPSEEK_MAX_TOKENS must be between 1 and 8192")
         return errors
 
 

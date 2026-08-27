@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from collections.abc import Iterable
 from typing import Any
 
@@ -19,31 +20,62 @@ class DeepSeekClient:
         api_key: str,
         base_url: str = "https://api.deepseek.com",
         model: str = "deepseek-chat",
-        timeout: float = 30,
+        timeout: float = 20,
+        max_retries: int = 2,
+        backoff: float = 0.25,
+        max_tokens: int = 1024,
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.timeout = timeout
+        self.max_retries = max_retries
+        self.backoff = backoff
+        self.max_tokens = max_tokens
+
+    @property
+    def available(self) -> bool:
+        return bool(self.api_key)
 
     def chat(
         self,
         messages: list[dict[str, str]],
         temperature: float = 0.2,
     ) -> str:
-        response = requests.post(
-            f"{self.base_url}/chat/completions",
-            headers=self._headers(),
-            json={
-                "model": self.model,
-                "messages": messages,
-                "temperature": temperature,
-                "stream": False,
-            },
-            timeout=self.timeout,
-        )
+        headers = self._headers()
+        response = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                response = requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json={
+                        "model": self.model,
+                        "messages": messages,
+                        "temperature": temperature,
+                        "max_tokens": self.max_tokens,
+                        "stream": False,
+                    },
+                    timeout=self.timeout,
+                )
+            except requests.RequestException as error:
+                if attempt >= self.max_retries:
+                    raise DeepseekError("DeepSeek is unavailable after bounded retries") from error
+                time.sleep(self.backoff * (2**attempt))
+                continue
+            if response.status_code != 429 and response.status_code < 500:
+                break
+            if attempt >= self.max_retries:
+                break
+            response.close()
+            time.sleep(self.backoff * (2**attempt))
+        if response is None:
+            raise DeepseekError("DeepSeek is unavailable")
         self._raise_for_status(response)
-        data = response.json()
+        try:
+            data = response.json()
+        except requests.JSONDecodeError as error:
+            raise DeepseekError("DeepSeek returned invalid JSON") from error
         try:
             return str(data["choices"][0]["message"]["content"])
         except (KeyError, IndexError, TypeError) as error:
@@ -61,6 +93,7 @@ class DeepSeekClient:
                 "model": self.model,
                 "messages": messages,
                 "temperature": temperature,
+                "max_tokens": self.max_tokens,
                 "stream": True,
             },
             timeout=self.timeout,

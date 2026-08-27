@@ -186,17 +186,17 @@ Chaque requête suit ce flux :
 
 ### Travail
 
-- [ ] Introduire un objet "ExecutionPlan" versionné et sérialisable.
-- [ ] Ajouter une prévisualisation lisible : commandes, fichiers potentiellement touchés, réseau, durée maximale et niveau de risque.
-- [ ] Afficher séparément la commande, stdout, stderr, code retour et synthèse DeepSeek ; ne jamais mélanger une sortie non fiable avec une instruction.
-- [ ] Ajouter pause, cancel, retry contrôlé, re-run et copie de commande.
-- [ ] Remplacer la session "default" par une vraie identité de session et une politique de rétention explicite.
-- [ ] Faire correspondre les événements SSE aux états métier et nettoyer les files d’événements à la déconnexion ou à l’expiration.
-- [ ] Ajouter une UI « approval first » avec un état connexion/auth visible, un affichage du périmètre et des erreurs actionnables.
-- [ ] Rendre l’interface utilisable au clavier, sur mobile et sans CDN externe en mode production.
-- [ ] Ajouter export/import de receipts redacted, afin de partager un résultat sans partager de secret ni de contenu privé.
-- [ ] Isoler l’adaptateur DeepSeek du moteur d’exécution : retries bornés, backoff, timeout, budget de tokens et mode indisponible explicite.
-- [ ] Ajouter un mode sans clé qui permet de découvrir les outils, tester la sandbox et rejouer des fixtures locales.
+- [x] Introduire un objet "ExecutionPlan" versionné et sérialisable.
+- [x] Ajouter une prévisualisation lisible : commandes, fichiers potentiellement touchés, réseau, durée maximale et niveau de risque.
+- [x] Afficher séparément la commande, stdout, stderr, code retour et synthèse DeepSeek ; ne jamais mélanger une sortie non fiable avec une instruction.
+- [x] Ajouter pause, cancel, retry contrôlé, re-run et copie de commande.
+- [x] Remplacer la session "default" par une vraie identité de session et une politique de rétention explicite.
+- [x] Faire correspondre les événements SSE aux états métier et nettoyer les files d’événements à la déconnexion ou à l’expiration.
+- [x] Ajouter une UI « approval first » avec un état connexion/auth visible, un affichage du périmètre et des erreurs actionnables.
+- [x] Rendre l’interface utilisable au clavier, sur mobile et sans CDN externe en mode production.
+- [x] Ajouter export/import de receipts redacted, afin de partager un résultat sans partager de secret ni de contenu privé.
+- [x] Isoler l’adaptateur DeepSeek du moteur d’exécution : retries bornés, backoff, timeout, budget de tokens et mode indisponible explicite.
+- [x] Ajouter un mode sans clé qui permet de découvrir les outils, tester la sandbox et rejouer des fixtures locales.
 
 ### Critères d’acceptation
 
@@ -204,6 +204,8 @@ Chaque requête suit ce flux :
 - Une receipt JSON peut être validée par un schéma et relue par la CLI.
 - Une panne DeepSeek ne fait pas croire qu’une commande a réussi et ne bloque pas les outils locaux de diagnostic.
 - Un test navigateur couvre le chargement, l’envoi, l’état d’attente, l’affichage d’erreur, l’approbation, l’annulation et le responsive.
+
+**Validation du jalon (2026-08-27) :** 81 tests passent avec 85,43 % de couverture, format/lint et syntaxe JS inclus. La QA navigateur réelle couvre authentification, plan réussi, policy bloquée, approbation obligatoire, pause, reprise, annulation, panne DeepSeek isolée, export redacted re-signé, raccourci clavier et layouts sans débordement aux breakpoints mobiles. Aucune erreur ni alerte console n’a été relevée.
 
 ## P4 — Installation, packaging et preuve publique
 

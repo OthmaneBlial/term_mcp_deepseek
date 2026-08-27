@@ -1,827 +1,316 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Term MCP DeepSeek — Approval-first mission control</title>
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
+      name="description"
+      content="Plan, approve, execute, and export signed terminal receipts from one local MCP mission control."
     />
-    <title>
-      Term MCP DeepSeek - AI Terminal
-      Assistant
-    </title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
-    <style>
-      .message-bubble {
-        max-width: 80%;
-        word-wrap: break-word;
-      }
-      .typing-indicator {
-        display: inline-block;
-      }
-      .typing-indicator span {
-        animation: typing 1.4s infinite
-          ease-in-out;
-      }
-      .typing-indicator
-        span:nth-child(1) {
-        animation-delay: -0.32s;
-      }
-      .typing-indicator
-        span:nth-child(2) {
-        animation-delay: -0.16s;
-      }
-      @keyframes typing {
-        0%,
-        80%,
-        100% {
-          opacity: 0;
-        }
-        40% {
-          opacity: 1;
-        }
-      }
-      .command-output {
-        background-color: #1a1a1a;
-        color: #f8f8f2;
-        font-family: "Monaco", "Menlo",
-          "Ubuntu Mono", monospace;
-        padding: 0.5rem;
-        border-radius: 0.25rem;
-        overflow-x: auto;
-      }
-      .error-message {
-        background-color: #fee2e2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
-      }
-      .success-message {
-        background-color: #d1fae5;
-        border: 1px solid #a7f3d0;
-        color: #059669;
-      }
-      .info-message {
-        background-color: #dbeafe;
-        border: 1px solid #bfdbfe;
-        color: #2563eb;
-      }
-    </style>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/app.css" />
+    <script src="/static/app.js" defer></script>
   </head>
+  <body>
+    <a class="skip-link" href="#commandInput">Skip to command planner</a>
 
-  <body
-    class="bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col h-screen"
-  >
-    <!-- Header -->
-    <header
-      class="bg-white shadow-lg border-b border-gray-200 flex-shrink-0"
-    >
-      <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-      >
-        <div
-          class="flex justify-between items-center py-4"
-        >
-          <div
-            class="flex items-center"
-          >
-            <i
-              class="fas fa-terminal text-2xl text-indigo-600 mr-3"
-            ></i>
-            <div>
-              <h1
-                class="text-2xl font-bold text-gray-900"
-              >
-                Term MCP DeepSeek
-              </h1>
-              <p
-                class="text-sm text-gray-500"
-              >
-                AI-powered terminal
-                assistant with MCP
-                protocol
-              </p>
-            </div>
-          </div>
-          <div
-            class="flex items-center space-x-4"
-          >
-            <div
-              id="connectionStatus"
-              class="flex items-center text-sm"
-            >
-              <div
-                class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"
-              ></div>
-              <span
-                class="text-gray-600"
-                >Connected</span
-              >
-            </div>
-            <div
-              id="sessionInfo"
-              class="text-sm text-gray-500"
-            >
-              Session:
-              <span id="sessionId"
-                >Loading...</span
-              >
-            </div>
-          </div>
+    <div class="auth-gate" id="authGate" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <form class="auth-card" id="authForm">
+        <p class="eyebrow">Local trust boundary</p>
+        <h1 id="authTitle">Connect to mission control</h1>
+        <p class="auth-copy">
+          Paste the bearer token printed by <code>term-mcp serve</code>. It stays in this browser
+          tab and is never written to local storage.
+        </p>
+        <label for="tokenInput">AUTH_TOKEN</label>
+        <div class="token-row">
+          <input
+            id="tokenInput"
+            name="token"
+            type="password"
+            minlength="32"
+            autocomplete="current-password"
+            required
+            spellcheck="false"
+          />
+          <button class="button button-primary" type="submit">Open console</button>
         </div>
+        <p class="field-note">Generate another token with <code>term-mcp token</code>.</p>
+        <p class="form-error" id="authError" role="alert"></p>
+      </form>
+    </div>
+
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Term MCP DeepSeek home">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>
+        <span>
+          <strong>TERM / MCP</strong>
+          <small>DEEPSEEK MISSION CONTROL</small>
+        </span>
+      </a>
+
+      <div class="connection-cluster" aria-live="polite">
+        <span class="status-chip" id="connectionChip" data-state="offline">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="connectionLabel">Locked</span>
+        </span>
+        <span class="status-chip subtle" id="modeChip">MODE —</span>
+        <span class="status-chip subtle" id="modelChip">MODEL —</span>
+      </div>
+
+      <div class="top-actions">
+        <button class="button button-quiet" id="newSessionButton" type="button">New session</button>
+        <button class="button button-quiet" id="lockButton" type="button">Lock</button>
       </div>
     </header>
 
-    <!-- Main Chat Area -->
-    <main
-      id="chatContainer"
-      class="flex-1 overflow-y-auto p-4 space-y-4 max-w-4xl mx-auto w-full"
-    >
-      <!-- Welcome Message -->
-      <div
-        class="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-      >
-        <div
-          class="flex items-start space-x-3"
-        >
-          <div class="flex-shrink-0">
-            <i
-              class="fas fa-robot text-2xl text-indigo-600"
-            ></i>
+    <main class="mission-shell">
+      <aside class="left-rail" aria-label="Execution boundary and demos">
+        <section class="rail-section">
+          <div class="section-heading">
+            <p class="eyebrow">01 / boundary</p>
+            <span class="micro-status">ENFORCED</span>
           </div>
-          <div class="flex-1">
-            <h3
-              class="text-lg font-medium text-gray-900 mb-2"
-            >
-              Welcome to Term MCP
-              DeepSeek!
-            </h3>
-            <p
-              class="text-gray-600 mb-4"
-            >
-              I'm your AI terminal
-              assistant. I can help you
-              with:
-            </p>
-            <ul
-              class="list-disc list-inside text-gray-600 space-y-1 mb-4"
-            >
-              <li>
-                File and directory
-                operations
-              </li>
-              <li>
-                System information and
-                monitoring
-              </li>
-              <li>
-                Running terminal
-                commands safely
-              </li>
-              <li>
-                Process management
-              </li>
-              <li>
-                Real-time command
-                execution
-              </li>
-            </ul>
-            <div
-              class="bg-gray-50 rounded-lg p-3"
-            >
-              <p
-                class="text-sm text-gray-600"
-              >
-                <strong
-                  >Example
-                  commands:</strong
-                >
-                "List files", "Show
-                system info", "Check
-                disk usage", "Find large
-                files"
-              </p>
+          <h2>Current scope</h2>
+          <dl class="boundary-list">
+            <div>
+              <dt>Workspace</dt>
+              <dd id="workspaceValue">Authenticate to reveal</dd>
             </div>
+            <div>
+              <dt>Session</dt>
+              <dd id="sessionValue">—</dd>
+            </div>
+            <div>
+              <dt>Retention</dt>
+              <dd id="retentionValue">—</dd>
+            </div>
+            <div>
+              <dt>Network</dt>
+              <dd id="networkValue">—</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="rail-section demos-section">
+          <div class="section-heading">
+            <p class="eyebrow">02 / no-key lab</p>
+            <span class="micro-status cyan">LOCAL</span>
+          </div>
+          <h2>Guided scenarios</h2>
+          <p class="rail-copy">Load a safe command. Nothing runs until its plan is visible.</p>
+          <div class="scenario-list" id="scenarioList" aria-live="polite"></div>
+        </section>
+
+        <section class="rail-section shortcuts-section">
+          <p class="eyebrow">Keyboard</p>
+          <dl class="shortcut-list">
+            <div><dt>Plan</dt><dd><kbd>⌘</kbd><kbd>↵</kbd></dd></div>
+            <div><dt>Focus command</dt><dd><kbd>/</kbd></dd></div>
+            <div><dt>Close notice</dt><dd><kbd>Esc</kbd></dd></div>
+          </dl>
+        </section>
+      </aside>
+
+      <section class="workbench" aria-labelledby="workbenchTitle">
+        <div class="workbench-intro">
+          <div>
+            <p class="eyebrow">Approval-first execution</p>
+            <h1 id="workbenchTitle">Make terminal work legible <em>before</em> it runs.</h1>
+          </div>
+          <div class="protocol-stamp" aria-label="MCP protocol support">
+            <span>MCP</span>
+            <strong>2026·07·28</strong>
+            <small>DUAL ERA</small>
           </div>
         </div>
-      </div>
-    </main>
 
-    <!-- Message Input -->
-    <div
-      class="bg-white border-t border-gray-200 p-4 flex-shrink-0"
-    >
-      <div class="max-w-4xl mx-auto">
-        <form
-          id="chatForm"
-          class="flex space-x-3"
-        >
-          <div class="flex-1 relative">
-            <input
-              type="text"
-              id="chatInput"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 pr-12"
-              placeholder="Ask me anything about your terminal..."
-              required
-              autocomplete="off"
-            />
-            <button
-              type="button"
-              id="clearButton"
-              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              title="Clear conversation"
-            >
-              <i
-                class="fas fa-trash-alt"
-              ></i>
-            </button>
+        <form class="command-composer" id="commandForm">
+          <div class="composer-main">
+            <label for="commandInput">Command to inspect</label>
+            <div class="prompt-line">
+              <span aria-hidden="true">$</span>
+              <input
+                id="commandInput"
+                name="command"
+                type="text"
+                placeholder="rg -n &quot;TODO&quot; ."
+                required
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
           </div>
-          <button
-            id="sendButton"
-            class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 flex items-center space-x-2"
-            type="submit"
-          >
-            <span id="sendText"
-              >Send</span
-            >
-            <i
-              class="fas fa-paper-plane"
-            ></i>
+          <div class="composer-cwd">
+            <label for="cwdInput">Working directory <span>(optional)</span></label>
+            <input id="cwdInput" name="cwd" type="text" placeholder="relative/path" spellcheck="false" />
+          </div>
+          <button class="button button-primary composer-submit" id="planButton" type="submit">
+            <span>Build plan</span>
+            <span aria-hidden="true">→</span>
           </button>
         </form>
 
-        <!-- Typing Indicator -->
-        <div
-          id="typingIndicator"
-          class="hidden mt-3 flex items-center space-x-2"
-        >
-          <div class="flex space-x-1">
-            <div
-              class="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
-            ></div>
-            <div
-              class="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
-              style="
-                animation-delay: 0.1s;
-              "
-            ></div>
-            <div
-              class="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"
-              style="
-                animation-delay: 0.2s;
-              "
-            ></div>
+        <div class="execution-strip" id="executionStrip" data-state="idle">
+          <div>
+            <span class="execution-beacon" aria-hidden="true"></span>
+            <strong id="executionState">Waiting for a plan</strong>
+            <small id="executionDetail">No command has crossed the execution boundary.</small>
           </div>
-          <span
-            class="text-sm text-gray-500"
-            >AI is thinking...</span
-          >
-        </div>
-
-        <!-- Error Display -->
-        <div
-          id="errorDisplay"
-          class="hidden mt-3 p-3 rounded-lg error-message"
-        >
-          <div
-            class="flex items-center space-x-2"
-          >
-            <i
-              class="fas fa-exclamation-triangle"
-            ></i>
-            <span id="errorText"></span>
+          <div class="execution-controls" aria-label="Active execution controls">
+            <button class="button button-control" id="pauseButton" type="button" disabled>Pause</button>
+            <button class="button button-control" id="resumeButton" type="button" disabled>Resume</button>
+            <button class="button button-danger" id="cancelButton" type="button" disabled>Cancel</button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <script>
-      // Global state
-      let currentSessionId = null
-      let messageHistory = []
-      let isTyping = false
+        <div class="notice" id="notice" role="status" aria-live="polite" hidden>
+          <span id="noticeText"></span>
+          <button id="noticeClose" type="button" aria-label="Close notification">×</button>
+        </div>
 
-      // DOM elements
-      const chatContainer =
-        document.getElementById(
-          "chatContainer"
-        )
-      const chatForm =
-        document.getElementById(
-          "chatForm"
-        )
-      const chatInput =
-        document.getElementById(
-          "chatInput"
-        )
-      const sendButton =
-        document.getElementById(
-          "sendButton"
-        )
-      const sendText =
-        document.getElementById(
-          "sendText"
-        )
-      const typingIndicator =
-        document.getElementById(
-          "typingIndicator"
-        )
-      const errorDisplay =
-        document.getElementById(
-          "errorDisplay"
-        )
-      const errorText =
-        document.getElementById(
-          "errorText"
-        )
-      const sessionIdElement =
-        document.getElementById(
-          "sessionId"
-        )
-      const clearButton =
-        document.getElementById(
-          "clearButton"
-        )
+        <section class="flow-section" aria-labelledby="flowTitle">
+          <div class="flow-heading">
+            <div>
+              <p class="eyebrow">03 / execution ledger</p>
+              <h2 id="flowTitle">Plans &amp; events</h2>
+            </div>
+            <span class="event-counter" id="eventCounter">0 events</span>
+          </div>
+          <div class="empty-ledger" id="emptyLedger">
+            <span aria-hidden="true">⌁</span>
+            <p>Your first plan will appear here with risk, scope, and limits attached.</p>
+          </div>
+          <div class="plan-ledger" id="planLedger"></div>
+        </section>
 
-      // Initialize the application
-      async function initializeApp() {
-        try {
-          // Test connection
-          const healthResponse =
-            await fetch("/health")
-          if (!healthResponse.ok) {
-            throw new Error(
-              "Server connection failed"
-            )
-          }
+        <details class="advisor-panel">
+          <summary>
+            <span>
+              <small>OPTIONAL / SEPARATE TRUST ZONE</small>
+              Ask DeepSeek for a human-readable analysis
+            </span>
+            <span aria-hidden="true">＋</span>
+          </summary>
+          <div class="advisor-body">
+            <p>
+              Model text is advisory only. It can suggest a command, but it cannot invoke one or
+              alter an execution receipt.
+            </p>
+            <form id="advisorForm">
+              <label for="advisorInput">Question</label>
+              <textarea
+                id="advisorInput"
+                rows="3"
+                placeholder="Which command would help me find the slowest tests?"
+                required
+              ></textarea>
+              <button class="button button-secondary" id="advisorButton" type="submit">Ask advisor</button>
+            </form>
+            <div class="advisor-response" id="advisorResponse" hidden>
+              <span>DEEPSEEK / UNTRUSTED TEXT</span>
+              <p id="advisorText"></p>
+            </div>
+          </div>
+        </details>
+      </section>
 
-          // Get initial session
-          await createNewSession()
+      <aside class="receipt-rail" aria-labelledby="receiptTitle">
+        <div class="receipt-heading">
+          <div>
+            <p class="eyebrow">04 / proof</p>
+            <h2 id="receiptTitle">Signed receipt</h2>
+          </div>
+          <span class="receipt-seal" id="receiptSeal">EMPTY</span>
+        </div>
 
-          // Setup SSE for real-time updates
-          setupSSE()
-        } catch (error) {
-          showError(
-            "Failed to connect to server: " +
-              error.message
-          )
-        }
-      }
+        <div class="receipt-actions">
+          <button class="button button-paper" id="importReceiptButton" type="button">Import</button>
+          <button class="button button-paper" id="exportReceiptButton" type="button" disabled>Export redacted</button>
+          <button class="button button-paper" id="copyReceiptButton" type="button" disabled>Copy JSON</button>
+          <input id="receiptFileInput" type="file" accept="application/json,.json" hidden />
+        </div>
 
-      // Create new session
-      async function createNewSession() {
-        try {
-          const response =
-            await authenticatedFetch(
-              "/chat",
-              {
-                method: "POST",
-                body: JSON.stringify({
-                  message: "Hello",
-                }),
-              }
-            )
+        <div class="receipt-empty" id="receiptEmpty">
+          <p>NO RECEIPT YET</p>
+          <span>A completed, failed, cancelled, or timed-out command prints its evidence here.</span>
+        </div>
 
-          if (response.ok) {
-            const data =
-              await response.json()
-            currentSessionId =
-              data.session_id
-            sessionIdElement.textContent =
-              currentSessionId.substring(
-                0,
-                8
-              ) + "..."
-          }
-        } catch (error) {
-          console.warn(
-            "Session creation failed:",
-            error
-          )
-        }
-      }
+        <article class="receipt-paper" id="receiptPaper" hidden>
+          <header>
+            <div>
+              <small>TERM MCP / EXECUTION RECEIPT</small>
+              <strong id="receiptStatus">—</strong>
+            </div>
+            <span id="receiptDuration">— ms</span>
+          </header>
 
-      // Setup Server-Sent Events
-      function setupSSE() {
-        if (!currentSessionId) return
+          <dl class="receipt-meta">
+            <div><dt>Receipt</dt><dd id="receiptId">—</dd></div>
+            <div><dt>Session</dt><dd id="receiptSession">—</dd></div>
+            <div><dt>Permission</dt><dd id="receiptPermission">—</dd></div>
+            <div><dt>Exit / signal</dt><dd id="receiptExit">—</dd></div>
+          </dl>
 
-        const eventSource =
-          new EventSource(
-            `/stream?session_id=${currentSessionId}`
-          )
+          <section>
+            <h3>Command</h3>
+            <pre id="receiptCommand"></pre>
+          </section>
+          <section>
+            <h3>STDOUT <span>untrusted output</span></h3>
+            <pre id="receiptStdout"></pre>
+          </section>
+          <section>
+            <h3>STDERR <span>untrusted output</span></h3>
+            <pre id="receiptStderr"></pre>
+          </section>
 
-        eventSource.onmessage =
-          function (event) {
-            try {
-              const data = JSON.parse(
-                event.data
-              )
-              handleSSEEvent(data)
-            } catch (error) {
-              console.error(
-                "SSE parse error:",
-                error
-              )
-            }
-          }
+          <footer>
+            <span>HMAC-SHA256</span>
+            <code id="receiptSignature">—</code>
+          </footer>
+        </article>
 
-        eventSource.onerror = function (
-          error
-        ) {
-          console.error(
-            "SSE error:",
-            error
-          )
-          showError(
-            "Real-time connection lost"
-          )
-        }
+        <a class="schema-link" href="/schemas/receipt-1.0.json" target="_blank" rel="noreferrer">
+          Receipt schema 1.0 ↗
+        </a>
+      </aside>
+    </main>
 
-        eventSource.onopen =
-          function () {
-            console.log(
-              "SSE connection opened"
-            )
-          }
-      }
-
-      // Handle SSE events
-      function handleSSEEvent(data) {
-        switch (data.type) {
-          case "command_start":
-            showTypingIndicator(
-              "Executing command: " +
-                data.command
-            )
-            break
-          case "command_complete":
-            hideTypingIndicator()
-            addCommandResult(
-              data.command,
-              data.output,
-              true
-            )
-            break
-          case "command_error":
-            hideTypingIndicator()
-            addCommandResult(
-              data.command,
-              data.error,
-              false
-            )
-            break
-          case "ping":
-            // Keep-alive ping
-            break
-          default:
-            console.log(
-              "Unknown SSE event:",
-              data
-            )
-        }
-      }
-
-      // Authenticated fetch wrapper
-      async function authenticatedFetch(
-        url,
-        options = {}
-      ) {
-        // For now, we'll assume authentication is handled server-side
-        // In production, you'd get and include auth tokens here
-        const defaultOptions = {
-          headers: {
-            "Content-Type":
-              "application/json",
-            ...options.headers,
-          },
-        }
-
-        return fetch(url, {
-          ...defaultOptions,
-          ...options,
-        })
-      }
-
-      // Add message to chat
-      function addMessage(
-        role,
-        content,
-        metadata = {}
-      ) {
-        const messageDiv =
-          document.createElement("div")
-        messageDiv.className = `flex ${
-          role === "user"
-            ? "justify-end"
-            : "justify-start"
-        } mb-4`
-
-        const bubble =
-          document.createElement("div")
-        bubble.className = `message-bubble p-4 rounded-lg shadow-sm ${
-          role === "user"
-            ? "bg-indigo-600 text-white rounded-br-sm"
-            : "bg-white text-gray-900 rounded-bl-sm border border-gray-200"
-        }`
-
-        if (metadata.isCommand) {
-          bubble.innerHTML = `
-                    <div class="flex items-center space-x-2 mb-2">
-                        <i class="fas fa-terminal text-xs"></i>
-                        <code class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">${
-                          metadata.command
-                        }</code>
-                    </div>
-                    <div class="command-output text-sm">${escapeHTML(
-                      content
-                    )}</div>
-                `
-        } else if (metadata.isError) {
-          bubble.className +=
-            " error-message"
-          bubble.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>${escapeHTML(
-                          content
-                        )}</span>
-                    </div>
-                `
-        } else {
-          bubble.innerHTML =
-            escapeHTMLAndConvertNewlines(
-              content
-            )
-        }
-
-        // Add timestamp
-        const timestamp =
-          document.createElement("div")
-        timestamp.className =
-          "text-xs text-gray-500 mt-1"
-        timestamp.textContent =
-          new Date().toLocaleTimeString()
-        bubble.appendChild(timestamp)
-
-        messageDiv.appendChild(bubble)
-        chatContainer.appendChild(
-          messageDiv
-        )
-
-        // Scroll to bottom
-        chatContainer.scrollTop =
-          chatContainer.scrollHeight
-
-        // Store in history
-        messageHistory.push({
-          role,
-          content,
-          metadata,
-          timestamp: Date.now(),
-        })
-      }
-
-      // Add command result
-      function addCommandResult(
-        command,
-        output,
-        success
-      ) {
-        addMessage(
-          "assistant",
-          output,
-          {
-            isCommand: true,
-            command: command,
-            success: success,
-          }
-        )
-      }
-
-      // Show typing indicator
-      function showTypingIndicator(
-        message = "AI is thinking..."
-      ) {
-        if (isTyping) return
-        isTyping = true
-        typingIndicator.querySelector(
-          "span"
-        ).textContent = message
-        typingIndicator.classList.remove(
-          "hidden"
-        )
-      }
-
-      // Hide typing indicator
-      function hideTypingIndicator() {
-        isTyping = false
-        typingIndicator.classList.add(
-          "hidden"
-        )
-      }
-
-      // Show error
-      function showError(message) {
-        errorText.textContent = message
-        errorDisplay.classList.remove(
-          "hidden"
-        )
-        setTimeout(() => {
-          errorDisplay.classList.add(
-            "hidden"
-          )
-        }, 5000)
-      }
-
-      // Hide error
-      function hideError() {
-        errorDisplay.classList.add(
-          "hidden"
-        )
-      }
-
-      // Send message
-      async function sendMessage(
-        message
-      ) {
-        if (!message.trim()) return
-
-        try {
-          hideError()
-          showTypingIndicator()
-
-          // Disable input while sending
-          chatInput.disabled = true
-          sendButton.disabled = true
-          sendText.textContent =
-            "Sending..."
-
-          const response =
-            await authenticatedFetch(
-              "/chat",
-              {
-                method: "POST",
-                body: JSON.stringify({
-                  message:
-                    message.trim(),
-                }),
-              }
-            )
-
-          const data =
-            await response.json()
-
-          if (!response.ok) {
-            throw new Error(
-              data.error ||
-                `HTTP ${response.status}`
-            )
-          }
-
-          hideTypingIndicator()
-
-          // Update session ID if provided
-          if (
-            data.session_id &&
-            data.session_id !==
-              currentSessionId
-          ) {
-            currentSessionId =
-              data.session_id
-            sessionIdElement.textContent =
-              currentSessionId.substring(
-                0,
-                8
-              ) + "..."
-          }
-
-          // Add response to chat
-          if (data.message) {
-            addMessage(
-              "assistant",
-              data.message
-            )
-          }
-        } catch (error) {
-          hideTypingIndicator()
-          showError(
-            "Failed to send message: " +
-              error.message
-          )
-          console.error(
-            "Send error:",
-            error
-          )
-        } finally {
-          // Re-enable input
-          chatInput.disabled = false
-          sendButton.disabled = false
-          sendText.textContent = "Send"
-          chatInput.focus()
-        }
-      }
-
-      // Clear conversation
-      function clearConversation() {
-        if (
-          confirm(
-            "Are you sure you want to clear the conversation?"
-          )
-        ) {
-          // Keep only the welcome message
-          const welcomeMessage =
-            chatContainer.querySelector(
-              ".bg-white.rounded-lg.shadow-sm"
-            )
-          chatContainer.innerHTML = ""
-          if (welcomeMessage) {
-            chatContainer.appendChild(
-              welcomeMessage
-            )
-          }
-          messageHistory = []
-          currentSessionId = null
-          sessionIdElement.textContent =
-            "Cleared"
-          createNewSession()
-        }
-      }
-
-      // Utility functions
-      function escapeHTML(text) {
-        const div =
-          document.createElement("div")
-        div.textContent = text
-        return div.innerHTML
-      }
-
-      function escapeHTMLAndConvertNewlines(
-        str
-      ) {
-        return escapeHTML(str)
-          .replace(/\n/g, "<br>")
-          .replace(/\s/g, "&nbsp;")
-      }
-
-      // Event listeners
-      chatForm.addEventListener(
-        "submit",
-        (e) => {
-          e.preventDefault()
-          const message =
-            chatInput.value.trim()
-          if (message) {
-            addMessage("user", message)
-            chatInput.value = ""
-            sendMessage(message)
-          }
-        }
-      )
-
-      clearButton.addEventListener(
-        "click",
-        clearConversation
-      )
-
-      // Keyboard shortcuts
-      document.addEventListener(
-        "keydown",
-        (e) => {
-          if (
-            e.ctrlKey &&
-            e.key === "Enter"
-          ) {
-            e.preventDefault()
-            chatForm.dispatchEvent(
-              new Event("submit")
-            )
-          }
-        }
-      )
-
-      // Initialize on page load
-      document.addEventListener(
-        "DOMContentLoaded",
-        initializeApp
-      )
-
-      // Handle page visibility changes
-      document.addEventListener(
-        "visibilitychange",
-        () => {
-          if (document.hidden) {
-            // Page is hidden
-          } else {
-            // Page is visible again
-            chatInput.focus()
-          }
-        }
-      )
-    </script>
+    <template id="planTemplate">
+      <article class="plan-card">
+        <header class="plan-header">
+          <div>
+            <span class="plan-index"></span>
+            <span class="plan-state"></span>
+          </div>
+          <span class="risk-badge"></span>
+        </header>
+        <div class="plan-command-row">
+          <span aria-hidden="true">$</span>
+          <code class="plan-command"></code>
+          <button class="icon-button copy-command" type="button" aria-label="Copy command">⧉</button>
+        </div>
+        <div class="plan-grid">
+          <dl class="plan-facts">
+            <div><dt>Workspace</dt><dd class="plan-cwd"></dd></div>
+            <div><dt>Potential writes</dt><dd class="plan-files"></dd></div>
+            <div><dt>Network</dt><dd class="plan-network"></dd></div>
+            <div><dt>Hard limit</dt><dd class="plan-timeout"></dd></div>
+          </dl>
+          <div class="policy-box">
+            <strong>POLICY DECISION</strong>
+            <ul class="plan-reasons"></ul>
+          </div>
+        </div>
+        <div class="plan-actions">
+          <button class="button button-approve approve-plan" type="button">Approve plan</button>
+          <button class="button button-primary execute-plan" type="button">Execute</button>
+          <button class="button button-secondary retry-plan" type="button">Re-plan</button>
+        </div>
+      </article>
+    </template>
   </body>
 </html>

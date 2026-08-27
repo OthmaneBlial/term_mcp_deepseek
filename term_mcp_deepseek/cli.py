@@ -14,6 +14,8 @@ from pathlib import Path
 
 from term_mcp_deepseek import __version__
 from term_mcp_deepseek.config import Settings
+from term_mcp_deepseek.demo import DEMO_SCENARIOS
+from term_mcp_deepseek.receipts import receipt_report, receipt_summary
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -36,6 +38,16 @@ def _build_parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("version", help="Print the installed version")
     subparsers.add_parser("token", help="Generate a strong local bearer token")
+    demo = subparsers.add_parser("demo", help="List model-free demonstration scenarios")
+    demo.add_argument("--json", action="store_true", dest="json_output")
+
+    receipt = subparsers.add_parser("receipt", help="Inspect an exported execution receipt")
+    receipt_commands = receipt.add_subparsers(dest="receipt_command", required=True)
+    receipt_validate = receipt_commands.add_parser("validate", help="Validate schema and signature")
+    receipt_validate.add_argument("file", type=Path)
+    receipt_validate.add_argument("--structure-only", action="store_true")
+    receipt_show = receipt_commands.add_parser("show", help="Print a privacy-aware receipt summary")
+    receipt_show.add_argument("file", type=Path)
     return parser
 
 
@@ -79,8 +91,31 @@ def main(argv: Sequence[str] | None = None) -> int:
     if command == "token":
         print(secrets.token_urlsafe(32))
         return 0
+    if command == "demo":
+        if args.json_output:
+            print(json.dumps({"scenarios": DEMO_SCENARIOS}, indent=2))
+        else:
+            for scenario in DEMO_SCENARIOS:
+                print(f"{scenario['id']}: {scenario['command']} — {scenario['outcome']}")
+        return 0
 
     settings = Settings.from_env()
+    if command == "receipt":
+        try:
+            payload = json.loads(args.file.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            print(f"receipt error: {error}", file=sys.stderr)
+            return 2
+        report = receipt_report(payload, settings.auth_token)
+        if args.receipt_command == "show":
+            if not report["schema_valid"]:
+                print(json.dumps(report, indent=2), file=sys.stderr)
+                return 1
+            print(json.dumps(receipt_summary(payload), indent=2, sort_keys=True))
+            return 0
+        print(json.dumps(report, indent=2, sort_keys=True))
+        valid = report["schema_valid"] and (bool(args.structure_only) or report["signature_valid"])
+        return 0 if valid else 1
     if command == "doctor":
         report, ok = _doctor(settings)
         if args.json_output:

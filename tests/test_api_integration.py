@@ -60,6 +60,9 @@ def test_mcp_discover_and_list_tools(client, auth_headers):
         "terminal_plan",
         "terminal_approve",
         "terminal_execute",
+        "terminal_retry",
+        "terminal_pause",
+        "terminal_resume",
         "terminal_cancel",
         "terminal_receipt",
     }
@@ -143,6 +146,37 @@ def test_safe_plan_executes_and_returns_signed_receipt(client, auth_headers):
     assert receipt["policy"]["reasons"]
     assert receipt["signal"] is None
     assert len(receipt["signature"]) == 64
+
+    validated = client.post(
+        "/receipts/validate",
+        json={"receipt": receipt},
+        headers=auth_headers,
+    )
+    assert validated.status_code == 200
+    assert validated.get_json() == {
+        "errors": [],
+        "schema_valid": True,
+        "signature_valid": True,
+    }
+
+    shared_response = client.post(
+        "/receipts/redact",
+        json={"receipt": receipt},
+        headers=auth_headers,
+    )
+    shared = shared_response.get_json()["receipt"]
+    assert shared_response.status_code == 200
+    assert shared["sharing_redacted"] is True
+    assert shared["stdout"] == "[REDACTED FOR SHARING]"
+    assert shared["cwd"] == "[REDACTED FOR SHARING]"
+    assert (
+        client.post(
+            "/receipts/validate",
+            json={"receipt": shared},
+            headers=auth_headers,
+        ).get_json()["signature_valid"]
+        is True
+    )
 
 
 def test_blocked_plan_never_executes(client, auth_headers):

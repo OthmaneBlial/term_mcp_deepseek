@@ -1,4 +1,4 @@
-def test_stream_starts_with_session_hello(client, auth_headers):
+def test_stream_starts_with_session_hello_and_unsubscribes(client, auth_headers, app):
     session_response = client.post("/sessions", headers=auth_headers)
     session_id = session_response.get_json()["session_id"]
 
@@ -13,3 +13,4 @@ def test_stream_starts_with_session_hello(client, auth_headers):
     assert response.status_code == 200
     assert "event: hello" in first_chunk
     assert f'"session": "{session_id}"' in first_chunk
+    assert app.event_bus.subscriber_count(session_id) == 0

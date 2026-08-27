@@ -155,6 +155,15 @@ class CommandPolicy:
         ):
             return self._blocked("ripgrep preprocessors are blocked", argv)
 
+        if executable == "sleep":
+            return PolicyDecision(
+                True,
+                RiskLevel.MEDIUM,
+                self.mode is not ApprovalMode.TRUSTED,
+                ["long-running process requires an explicit approval"],
+                argv,
+            )
+
         if executable in READ_ONLY_COMMANDS:
             return PolicyDecision(True, RiskLevel.LOW, False, ["read-only command"], argv)
 

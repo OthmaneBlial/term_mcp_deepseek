@@ -34,17 +34,25 @@ class SessionState:
     plans: dict[str, ExecutionPlan] = field(default_factory=dict)
     receipts: dict[str, ExecutionReceipt] = field(default_factory=dict)
     active_process: subprocess.Popen | None = None
+    active_plan_id: str | None = None
+    paused: bool = False
     cancel_requested: bool = False
     last_activity: float = field(default_factory=time.time)
     lock: threading.RLock = field(default_factory=threading.RLock)
 
 
 class SessionRegistry:
-    def __init__(self, max_sessions: int = 10, timeout_seconds: int = 3600) -> None:
+    def __init__(
+        self,
+        max_sessions: int = 10,
+        timeout_seconds: int = 3600,
+        on_close=None,
+    ) -> None:
         self.max_sessions = max_sessions
         self.timeout_seconds = timeout_seconds
         self._sessions: dict[str, SessionState] = {}
         self._lock = threading.Lock()
+        self.on_close = on_close
 
     def create(self) -> SessionState:
         with self._lock:
@@ -69,6 +77,8 @@ class SessionRegistry:
             session = self._sessions.pop(session_id, None)
         if session and session.active_process:
             _terminate_process(session.active_process)
+        if session and self.on_close:
+            self.on_close(session_id)
 
     def cleanup(self) -> None:
         with self._lock:
@@ -91,6 +101,8 @@ class SessionRegistry:
             session = self._sessions.pop(session_id)
             if session.active_process:
                 _terminate_process(session.active_process)
+            if self.on_close:
+                self.on_close(session_id)
 
 
 class ExecutionService:
@@ -109,7 +121,7 @@ class ExecutionService:
         self.audit_log = audit_log
         self.command_timeout = command_timeout
         self.max_output_bytes = max_output_bytes
-        self.sessions = SessionRegistry(max_sessions, session_timeout)
+        self.sessions = SessionRegistry(max_sessions, session_timeout, event_bus.close)
 
     def create_session(self) -> dict[str, str]:
         session = self.sessions.create()
@@ -128,22 +140,30 @@ class ExecutionService:
         session = self.sessions.get(session_id)
         selected_cwd = self.policy.resolve_cwd(cwd)
         decision = self.policy.analyze(command, selected_cwd)
+        limits = {
+            "timeout_seconds": self.command_timeout,
+            "max_output_bytes": self.max_output_bytes,
+            "max_processes_per_session": 1,
+        }
         plan = ExecutionPlan(
             command=command,
             session_id=session_id,
             cwd=str(selected_cwd),
             mode=self.policy.mode,
             decision=decision,
-            limits={
-                "timeout_seconds": self.command_timeout,
-                "max_output_bytes": self.max_output_bytes,
-                "max_processes_per_session": 1,
-            },
+            limits=limits,
+            preview=_build_preview(decision, limits),
         )
         with session.lock:
             session.plans[plan.id] = plan
         self.event_bus.publish(session_id, {"type": "plan", "plan": plan.to_dict()})
         return plan
+
+    def replan(self, session_id: str, plan_id: str) -> ExecutionPlan:
+        previous = self._get_plan(session_id, plan_id)
+        if previous.status in {PlanStatus.RUNNING, PlanStatus.PAUSED}:
+            raise ExecutionError("running plans cannot be retried")
+        return self.plan(session_id, previous.command, previous.cwd)
 
     def approve(self, session_id: str, plan_id: str) -> ExecutionPlan:
         plan = self._get_plan(session_id, plan_id)
@@ -167,9 +187,11 @@ class ExecutionService:
             raise ExecutionError(f"plan cannot execute from {plan.status.value}")
 
         with session.lock:
-            if session.active_process is not None:
+            if session.active_process is not None or session.active_plan_id is not None:
                 raise ExecutionError("another command is already running in this session")
             session.cancel_requested = False
+            session.active_plan_id = plan.id
+            session.paused = False
             plan.status = PlanStatus.RUNNING
         started_at = utc_now()
         start = time.monotonic()
@@ -181,6 +203,38 @@ class ExecutionService:
         with session.lock:
             session.receipts[receipt.id] = receipt
         return receipt
+
+    def pause(self, session_id: str) -> bool:
+        session = self.sessions.get(session_id)
+        with session.lock:
+            process = session.active_process
+            plan = session.plans.get(session.active_plan_id or "")
+            if process is None or plan is None or process.poll() is not None or session.paused:
+                return False
+            try:
+                os.killpg(process.pid, signal.SIGSTOP)
+            except ProcessLookupError:
+                return False
+            session.paused = True
+            plan.status = PlanStatus.PAUSED
+        self.event_bus.publish(session_id, {"type": "command_paused", "plan": plan.to_dict()})
+        return True
+
+    def resume(self, session_id: str) -> bool:
+        session = self.sessions.get(session_id)
+        with session.lock:
+            process = session.active_process
+            plan = session.plans.get(session.active_plan_id or "")
+            if process is None or plan is None or process.poll() is not None or not session.paused:
+                return False
+            try:
+                os.killpg(process.pid, signal.SIGCONT)
+            except ProcessLookupError:
+                return False
+            session.paused = False
+            plan.status = PlanStatus.RUNNING
+        self.event_bus.publish(session_id, {"type": "command_resumed", "plan": plan.to_dict()})
+        return True
 
     def cancel(self, session_id: str) -> bool:
         session = self.sessions.get(session_id)
@@ -245,6 +299,8 @@ class ExecutionService:
             finally:
                 with session.lock:
                     session.active_process = None
+                    session.active_plan_id = None
+                    session.paused = False
 
         plan.status = final_status
         finished_at = utc_now()
@@ -316,6 +372,35 @@ def _safe_environment(workspace: Path) -> dict[str, str]:
     return environment
 
 
+def _build_preview(decision, limits: dict[str, int | float]) -> dict[str, object]:
+    argv = list(decision.argv)
+    executable = Path(argv[0]).name if argv else "unknown"
+    write_commands = {"cp", "mkdir", "mv", "rm", "touch"}
+    files = []
+    if executable in write_commands:
+        files = [token for token in argv[1:] if not token.startswith("-")]
+    network_commands = {("cargo", operation) for operation in {"add", "fetch", "install", "update"}}
+    network_commands |= {("go", operation) for operation in {"get", "install"}}
+    network_commands |= {
+        (manager, operation)
+        for manager in {"npm", "pnpm", "yarn"}
+        for operation in {"add", "install", "update"}
+    }
+    network_commands |= {("uv", operation) for operation in {"add", "pip", "sync"}}
+    operation = (executable, Path(argv[1]).name if len(argv) > 1 else "")
+    return {
+        "executable": executable,
+        "files_potentially_touched": files or (["repository state"] if executable == "git" else []),
+        "network_requested": operation in network_commands,
+        "executes_project_code": any(
+            "project-defined code" in reason for reason in decision.reasons
+        ),
+        "max_duration_seconds": limits["timeout_seconds"],
+        "max_output_bytes": limits["max_output_bytes"],
+        "risk": decision.risk.value,
+    }
+
+
 def _read_limited(handle, limit: int) -> tuple[str, bool]:
     handle.flush()
     size = handle.seek(0, os.SEEK_END)
@@ -331,6 +416,7 @@ def _terminate_process(process: subprocess.Popen) -> None:
     if process.poll() is not None:
         return
     try:
+        os.killpg(process.pid, signal.SIGCONT)
         os.killpg(process.pid, signal.SIGTERM)
         process.wait(timeout=1)
     except (ProcessLookupError, subprocess.TimeoutExpired):

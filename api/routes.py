@@ -15,7 +15,13 @@ from flask import (
     stream_with_context,
 )
 
+from term_mcp_deepseek.demo import DEMO_SCENARIOS
 from term_mcp_deepseek.protocol import stamp_modern_result, validate_http_request
+from term_mcp_deepseek.receipts import (
+    receipt_report,
+    receipt_schema,
+    redact_receipt_for_sharing,
+)
 from tools.json_rpc import JSONRPCError, create_jsonrpc_error
 
 bp = Blueprint("api", __name__)
@@ -24,6 +30,16 @@ bp = Blueprint("api", __name__)
 @bp.get("/health")
 def health():
     return jsonify(status="ok", version=current_app.extensions["term_mcp"]["version"]), 200
+
+
+@bp.get("/schemas/receipt-1.0.json")
+def receipt_schema_api():
+    return jsonify(receipt_schema()), 200
+
+
+@bp.get("/demo/scenarios")
+def demo_scenarios():
+    return jsonify(scenarios=DEMO_SCENARIOS), 200
 
 
 @bp.post("/chat")
@@ -36,6 +52,31 @@ def chat():
 @bp.post("/sessions")
 def create_session():
     return jsonify(current_app.mcp.create_session()), 201
+
+
+@bp.post("/receipts/validate")
+def validate_receipt_api():
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify(error="receipt_object_required"), 400
+    receipt = payload.get("receipt", payload)
+    settings = current_app.extensions["term_mcp"]["settings"]
+    report = receipt_report(receipt, settings.auth_token)
+    return jsonify(report), 200 if report["schema_valid"] else 400
+
+
+@bp.post("/receipts/redact")
+def redact_receipt_api():
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify(error="receipt_object_required"), 400
+    receipt = payload.get("receipt", payload)
+    settings = current_app.extensions["term_mcp"]["settings"]
+    try:
+        redacted = redact_receipt_for_sharing(receipt, settings.auth_token)
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
+    return jsonify(receipt=redacted), 200
 
 
 @bp.delete("/sessions/<session_id>")
@@ -108,7 +149,8 @@ def terminate_mcp_session():
 def stream():
     session_id = request.args.get("session_id") or "default"
     current_app.mcp.execution.sessions.get(session_id)
-    q = current_app.event_bus.get(session_id)
+    event_bus = current_app.event_bus
+    subscriber_id, q = event_bus.subscribe(session_id)
 
     def _sse(data: dict, event: str | None = None):
         # format: optional "event:" then "data:"; blank line to end
@@ -136,8 +178,9 @@ def stream():
                         last_beat = now
                         yield _sse({"ts": int(now)}, event="ping")
         except GeneratorExit:
-            # client disconnected
             return
+        finally:
+            event_bus.unsubscribe(session_id, subscriber_id)
 
     headers = {
         "Content-Type": "text/event-stream",
@@ -145,4 +188,6 @@ def stream():
         "Connection": "keep-alive",
         "X-Accel-Buffering": "no",  # Nginx
     }
-    return Response(generate(), headers=headers)
+    response = Response(generate(), headers=headers)
+    response.call_on_close(lambda: event_bus.unsubscribe(session_id, subscriber_id))
+    return response

@@ -91,7 +91,13 @@ def create_app(
         if origin and origin not in selected.allowed_origins:
             return jsonify(error="origin_not_allowed"), 403
 
-        public_endpoints = {"api.health", "api.root", "static"}
+        public_endpoints = {
+            "api.demo_scenarios",
+            "api.health",
+            "api.receipt_schema_api",
+            "api.root",
+            "static",
+        }
         if request.endpoint in public_endpoints or request.method == "OPTIONS":
             return None
 
