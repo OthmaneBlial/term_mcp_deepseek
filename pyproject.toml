@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+requires = ["setuptools==84.0.0", "wheel==0.48.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -41,7 +41,7 @@ dev = [
   "build>=1.2,<2",
   "pip-audit>=2.9,<3",
   "ruff>=0.12,<1",
-  "twine>=6,<7",
+  "twine>=6,<8",
 ]
 
 [project.scripts]
