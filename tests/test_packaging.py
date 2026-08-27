@@ -16,3 +16,4 @@ def test_runtime_assets_are_packaged_with_the_application():
     assert package.joinpath("static/app.js").is_file()
     assert package.joinpath("static/favicon.svg").is_file()
     assert package.joinpath("schemas/receipt.schema.json").is_file()
+    assert package.joinpath("schemas/recipe.schema.json").is_file()

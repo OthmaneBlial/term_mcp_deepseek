@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "id": "read-only-boundary",
+  "title": "Prove the inspect-only execution boundary",
+  "intent": "Produce simple signed receipts while requesting no write, network, or project-code capability.",
+  "prerequisites": [
+    "pwd and ls are installed in trusted system paths"
+  ],
+  "permissions": {"mode": "inspect", "network": false, "writes": false},
+  "risk": "low",
+  "limits": {"timeout_seconds": 5, "max_output_bytes": 65536},
+  "steps": [
+    {"name": "Confirm workspace boundary", "command": "pwd", "expected_status": "succeeded"},
+    {"name": "List only top-level metadata", "command": "ls -la", "expected_status": "succeeded"}
+  ],
+  "expected_output": "Two low-risk successful receipts signed by the normal execution engine.",
+  "sample_receipt": {
+    "sharing_redacted": true,
+    "status": "succeeded",
+    "risk": "low",
+    "command": "[REDACTED FOR SHARING]",
+    "cwd": "[REDACTED FOR SHARING]",
+    "stdout": "[REDACTED FOR SHARING]",
+    "stderr": "[REDACTED FOR SHARING]"
+  }
+}

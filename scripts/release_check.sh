@@ -56,6 +56,7 @@ from zipfile import ZipFile
 
 wheel = next(Path("$RELEASE_DIST").glob("*.whl"))
 required = {
+    "term_mcp_deepseek/schemas/recipe.schema.json",
     "term_mcp_deepseek/schemas/receipt.schema.json",
     "term_mcp_deepseek/static/app.css",
     "term_mcp_deepseek/static/app.js",

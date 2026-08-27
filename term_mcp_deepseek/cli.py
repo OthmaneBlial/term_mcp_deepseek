@@ -19,6 +19,7 @@ from term_mcp_deepseek import __version__
 from term_mcp_deepseek.config import Settings
 from term_mcp_deepseek.demo import DEMO_SCENARIOS
 from term_mcp_deepseek.receipts import receipt_report, receipt_summary
+from term_mcp_deepseek.recipes import RecipeError, run_recipe, validate_recipe_file
 from term_mcp_deepseek.server import MCPServer
 
 
@@ -57,6 +58,18 @@ def _build_parser() -> argparse.ArgumentParser:
     receipt_validate.add_argument("--structure-only", action="store_true")
     receipt_show = receipt_commands.add_parser("show", help="Print a privacy-aware receipt summary")
     receipt_show.add_argument("file", type=Path)
+
+    recipe = subparsers.add_parser("recipe", help="Validate or run a safe community recipe")
+    recipe_commands = recipe.add_subparsers(dest="recipe_command", required=True)
+    recipe_validate = recipe_commands.add_parser(
+        "validate", help="Validate recipe schema and policy"
+    )
+    recipe_validate.add_argument("files", nargs="+", type=Path)
+    recipe_validate.add_argument("--workspace", type=Path, default=Path.cwd())
+    recipe_run = recipe_commands.add_parser("run", help="Run an inspect-only recipe")
+    recipe_run.add_argument("file", type=Path)
+    recipe_run.add_argument("--workspace", type=Path, default=Path.cwd())
+    recipe_run.add_argument("--json", action="store_true", dest="json_output")
     return parser
 
 
@@ -176,6 +189,29 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             for scenario in DEMO_SCENARIOS:
                 print(f"{scenario['id']}: {scenario['command']} — {scenario['outcome']}")
+        return 0
+    if command == "recipe":
+        if not args.workspace.is_dir():
+            print(f"recipe error: workspace does not exist: {args.workspace}", file=sys.stderr)
+            return 2
+        if args.recipe_command == "validate":
+            reports = [validate_recipe_file(path, args.workspace) for path in args.files]
+            print(json.dumps({"recipes": reports}, indent=2, sort_keys=True))
+            return 0 if all(report["valid"] for report in reports) else 1
+        try:
+            result = run_recipe(args.file, args.workspace)
+        except RecipeError as error:
+            print(f"recipe error: {error}", file=sys.stderr)
+            return 1
+        if args.json_output:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print(f"{result['recipe_id']}: {result['status']}")
+            for step in result["steps"]:
+                print(
+                    f"- {step['name']}: {step['status']} "
+                    f"({step['duration_ms']} ms, {step['output_bytes']} bytes)"
+                )
         return 0
 
     settings = Settings.from_env()

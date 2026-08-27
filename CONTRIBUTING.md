@@ -14,6 +14,8 @@ python3 -m venv .venv
 
 Supported development hosts are Linux and macOS with Python 3.10–3.13. Docker is useful for the packaged Linux path.
 
+VS Code and compatible editors can reopen the checkout in the pinned [devcontainer](.devcontainer/devcontainer.json). Its post-create step builds the same `.venv` and installs the same `dev` extra used below.
+
 ## Repository guide
 
 - `term_mcp_deepseek/`: package, policy, execution, protocol, receipts, UI assets;
@@ -23,6 +25,8 @@ Supported development hosts are Linux and macOS with Python 3.10–3.13. Docker 
 - `tests/`: unit, integration, protocol fixture, official-client, UI contract tests;
 - `docs/`: architecture, compatibility, security, operations, and release guidance;
 - `examples/`: small no-secret recipes checked in CI.
+- `benchmarks/`: local, no-model execution-boundary measurements;
+- `docs/adr/`: append-only architectural decisions.
 
 Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) before changing execution or protocol behavior.
 
@@ -59,6 +63,17 @@ Vulnerabilities must use GitHub private vulnerability reporting as described in 
 
 The PR template asks for protocol, security, and receipt impact so reviewers can find sensitive changes quickly.
 
+## Adding a recipe
+
+Copy `examples/recipe-template.json`, keep the recipe inspect-only, and make every prerequisite visible. Then run:
+
+```bash
+term-mcp recipe validate examples/recipes/your-recipe.json --workspace .
+term-mcp recipe run examples/recipes/your-recipe.json --workspace .
+```
+
+See [the recipe guide](examples/README.md). CI validates and executes the complete catalog, so examples cannot silently gain write, network, approval, or higher-risk behavior.
+
 ## Adding a tool
 
 A new tool must have:
@@ -73,6 +88,8 @@ A new tool must have:
 - failure tests proving that malformed or cross-session calls remain closed.
 
 Do not add a direct terminal-write or arbitrary-shell tool.
+
+The complete review path is in [Adding an MCP tool safely](docs/ADDING_A_TOOL.md). Benchmark changes use the [reproducible benchmark contract](docs/BENCHMARKS.md), and maintainers record trust-boundary decisions using the [maintainer playbook](docs/MAINTAINERS.md).
 
 ## Commit style
 

@@ -79,6 +79,8 @@ term-mcp doctor --connectivity        optional DeepSeek endpoint check
 term-mcp demo                        no-key guided scenarios
 term-mcp receipt validate FILE       schema and HMAC validation
 term-mcp receipt show FILE           privacy-aware summary
+term-mcp recipe validate FILE...     schema and policy validation
+term-mcp recipe run FILE             inspect-only recipe execution
 term-mcp token                       strong bearer token generator
 term-mcp version                     installed version
 ```
@@ -88,6 +90,17 @@ Run a complete local quality gate with:
 ```bash
 ./local_ci.sh
 ```
+
+## Safe recipe catalog
+
+The repository includes five small workflows for repository inspection, test discovery, log inventory, port configuration, and proof of the read-only boundary. Every recipe is schema-versioned, inspect-only, network-free, write-free, bounded, and checked by the production policy before it can run.
+
+```bash
+term-mcp recipe validate examples/recipes/*.json --workspace .
+term-mcp recipe run examples/recipes/inspect-repository.json --workspace .
+```
+
+Browse the [recipe catalog and contribution template](examples/README.md). CI executes the complete catalog and runs the [no-model benchmark](docs/BENCHMARKS.md).
 
 ## MCP clients
 
@@ -166,6 +179,8 @@ Do not commit `.env`. Add `DEEPSEEK_API_KEY` only for the optional advisor panel
 | MCP versions and clients | [Compatibility](docs/MCP_COMPATIBILITY.md) |
 | Deployment and rollback | [Operations](docs/OPERATIONS.md) |
 | Security assumptions | [Security policy](SECURITY.md) and [threat model](docs/THREAT_MODEL.md) |
+| Safe examples | [Recipe catalog](examples/README.md) |
+| Local performance evidence | [Benchmark contract](docs/BENCHMARKS.md) |
 | Direction and acceptance criteria | [Roadmap](ROADMAP.md) |
 | Release history | [Changelog](CHANGELOG.md) |
 

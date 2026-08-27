@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "replace-with-recipe-id",
+  "title": "Replace with a concrete outcome",
+  "intent": "Explain the narrow question this recipe answers for a repository.",
+  "prerequisites": [
+    "List every command and file assumption here"
+  ],
+  "permissions": {
+    "mode": "inspect",
+    "network": false,
+    "writes": false
+  },
+  "risk": "low",
+  "limits": {
+    "timeout_seconds": 10,
+    "max_output_bytes": 65536
+  },
+  "steps": [
+    {
+      "name": "Name the observable step",
+      "command": "pwd",
+      "expected_status": "succeeded"
+    }
+  ],
+  "expected_output": "Describe what a successful receipt proves without promising exact private output.",
+  "sample_receipt": {
+    "sharing_redacted": true,
+    "status": "succeeded",
+    "risk": "low",
+    "command": "[REDACTED FOR SHARING]",
+    "cwd": "[REDACTED FOR SHARING]",
+    "stdout": "[REDACTED FOR SHARING]",
+    "stderr": "[REDACTED FOR SHARING]"
+  }
+}

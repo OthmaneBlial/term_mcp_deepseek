@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "id": "inspect-repository",
+  "title": "Inspect repository state and tracked files",
+  "intent": "Reveal repository state and its tracked file surface without changing the working tree.",
+  "prerequisites": [
+    "The workspace is a Git repository",
+    "Git is installed in a trusted system path"
+  ],
+  "permissions": {"mode": "inspect", "network": false, "writes": false},
+  "risk": "low",
+  "limits": {"timeout_seconds": 10, "max_output_bytes": 131072},
+  "steps": [
+    {"name": "Read working tree state", "command": "git status --short", "expected_status": "succeeded"},
+    {"name": "List tracked files", "command": "git ls-files", "expected_status": "succeeded"}
+  ],
+  "expected_output": "Two successful signed receipts containing only Git read operations.",
+  "sample_receipt": {
+    "sharing_redacted": true,
+    "status": "succeeded",
+    "risk": "low",
+    "command": "[REDACTED FOR SHARING]",
+    "cwd": "[REDACTED FOR SHARING]",
+    "stdout": "[REDACTED FOR SHARING]",
+    "stderr": "[REDACTED FOR SHARING]"
+  }
+}

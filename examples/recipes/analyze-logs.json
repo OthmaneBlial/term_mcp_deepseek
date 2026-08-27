@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "id": "analyze-logs",
+  "title": "Inventory bounded local log files",
+  "intent": "Discover nearby log files before selecting a specific file for a separate bounded inspection.",
+  "prerequisites": [
+    "find is installed in a trusted system path",
+    "The operator understands that file names can still be sensitive"
+  ],
+  "permissions": {"mode": "inspect", "network": false, "writes": false},
+  "risk": "low",
+  "limits": {"timeout_seconds": 10, "max_output_bytes": 65536},
+  "steps": [
+    {"name": "Find nearby log files", "command": "find . -maxdepth 3 -name *.log", "expected_status": "succeeded"}
+  ],
+  "expected_output": "A signed inventory receipt with no log contents, writes, or network access.",
+  "sample_receipt": {
+    "sharing_redacted": true,
+    "status": "succeeded",
+    "risk": "low",
+    "command": "[REDACTED FOR SHARING]",
+    "cwd": "[REDACTED FOR SHARING]",
+    "stdout": "[REDACTED FOR SHARING]",
+    "stderr": "[REDACTED FOR SHARING]"
+  }
+}

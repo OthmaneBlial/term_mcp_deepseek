@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OthmaneBlial/term_mcp_deepseek/schemas/recipe-1.0.json",
+  "title": "Term MCP DeepSeek safe recipe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "intent",
+    "prerequisites",
+    "permissions",
+    "risk",
+    "limits",
+    "steps",
+    "expected_output",
+    "sample_receipt"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "title": {"type": "string", "minLength": 5, "maxLength": 80},
+    "intent": {"type": "string", "minLength": 10, "maxLength": 300},
+    "prerequisites": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 2}
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "network", "writes"],
+      "properties": {
+        "mode": {"const": "inspect"},
+        "network": {"const": false},
+        "writes": {"const": false}
+      }
+    },
+    "risk": {"const": "low"},
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timeout_seconds", "max_output_bytes"],
+      "properties": {
+        "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 30},
+        "max_output_bytes": {"type": "integer", "minimum": 1024, "maximum": 1048576}
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "command", "expected_status"],
+        "properties": {
+          "name": {"type": "string", "minLength": 3, "maxLength": 80},
+          "command": {"type": "string", "minLength": 2, "maxLength": 1000},
+          "cwd": {"type": "string", "minLength": 1},
+          "expected_status": {"const": "succeeded"}
+        }
+      }
+    },
+    "expected_output": {"type": "string", "minLength": 5, "maxLength": 300},
+    "sample_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sharing_redacted",
+        "status",
+        "risk",
+        "command",
+        "cwd",
+        "stdout",
+        "stderr"
+      ],
+      "properties": {
+        "sharing_redacted": {"const": true},
+        "status": {"const": "succeeded"},
+        "risk": {"const": "low"},
+        "command": {"const": "[REDACTED FOR SHARING]"},
+        "cwd": {"const": "[REDACTED FOR SHARING]"},
+        "stdout": {"const": "[REDACTED FOR SHARING]"},
+        "stderr": {"const": "[REDACTED FOR SHARING]"}
+      }
+    }
+  }
+}

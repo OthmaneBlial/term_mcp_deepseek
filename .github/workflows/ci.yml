@@ -64,6 +64,25 @@ jobs:
           path: ${{ runner.temp }}/release-dist/*
           if-no-files-found: error
 
+  examples:
+    name: Safe recipes and benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --editable ".[test]"
+      - name: Validate and execute every public recipe
+        run: |
+          for recipe in examples/recipes/*.json; do
+            term-mcp recipe validate "$recipe" --workspace .
+            term-mcp recipe run "$recipe" --workspace . --json >/dev/null
+          done
+      - name: Run bounded no-model benchmark
+        run: python -m benchmarks.run_benchmark --iterations 2 --json
+
   docker:
     name: Docker build and health
     runs-on: ubuntu-latest
