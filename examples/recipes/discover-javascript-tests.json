@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "discover-javascript-tests",
+  "title": "Discover JavaScript and TypeScript test configuration",
+  "intent": "Locate declared test scripts, common runner configuration, and test files without executing project code.",
+  "prerequisites": [
+    "rg is installed in a trusted system path",
+    "The workspace root contains package.json with at least one test-related entry",
+    "At least one listed JavaScript or TypeScript test configuration or test file exists"
+  ],
+  "permissions": {"mode": "inspect", "network": false, "writes": false},
+  "risk": "low",
+  "limits": {"timeout_seconds": 10, "max_output_bytes": 131072},
+  "steps": [
+    {
+      "name": "Read declared test configuration",
+      "command": "rg -n test package.json",
+      "expected_status": "succeeded"
+    },
+    {
+      "name": "Inventory test configuration and test files",
+      "command": "rg --files -g jest.config.* -g vitest.config.* -g playwright.config.* -g cypress.config.* -g .mocharc.* -g tsconfig*.json -g *.test.js -g *.test.jsx -g *.test.ts -g *.test.tsx -g *.spec.js -g *.spec.jsx -g *.spec.ts -g *.spec.tsx",
+      "expected_status": "succeeded"
+    }
+  ],
+  "expected_output": "Signed receipts identify package test declarations and matching configuration or test files without running them.",
+  "sample_receipt": {
+    "sharing_redacted": true,
+    "status": "succeeded",
+    "risk": "low",
+    "command": "[REDACTED FOR SHARING]",
+    "cwd": "[REDACTED FOR SHARING]",
+    "stdout": "[REDACTED FOR SHARING]",
+    "stderr": "[REDACTED FOR SHARING]"
+  }
+}

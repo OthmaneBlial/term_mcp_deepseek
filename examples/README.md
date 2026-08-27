@@ -30,6 +30,7 @@ The [proof gallery](../docs/GALLERY.md) pairs these recipes with complete sharin
 | --- | --- |
 | `inspect-repository` | What state and tracked surface does this repository have? |
 | `diagnose-tests` | Where is the test configuration and what test files exist? |
+| `discover-javascript-tests` | Which JavaScript or TypeScript test scripts, runner configuration, and test files are present? |
 | `analyze-logs` | Which local log files are available for a later bounded review? |
 | `verify-port-config` | Do environment and container files agree on the service port? |
 | `read-only-boundary` | Can the engine produce receipts without write or network permission? |
