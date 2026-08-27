@@ -1,0 +1,13 @@
+{
+  "jsonrpc": "2.0",
+  "id": "initialize-fixture",
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-11-25",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "contract-fixture",
+      "version": "1.0.0"
+    }
+  }
+}

@@ -76,23 +76,21 @@ def test_unknown_prompt_is_structured_error(tmp_path):
     with pytest.raises(JSONRPCError) as raised:
         server.get_prompt("unknown")
 
-    assert raised.value.code == -32601
+    assert raised.value.code == -32602
 
 
 def test_tool_arguments_follow_declared_schema(tmp_path):
     server = make_server(tmp_path)
 
-    with pytest.raises(JSONRPCError) as unexpected:
-        server.call_tool(
-            "terminal_plan",
-            {"session_id": "session-1234", "command": "pwd", "surprise": True},
-        )
-    with pytest.raises(JSONRPCError) as wrong_type:
-        server.call_tool(
-            "terminal_plan",
-            {"session_id": "session-1234", "command": 123},
-        )
+    unexpected = server.call_tool(
+        "terminal_plan",
+        {"session_id": "session-1234", "command": "pwd", "surprise": True},
+    )
+    wrong_type = server.call_tool(
+        "terminal_plan",
+        {"session_id": "session-1234", "command": 123},
+    )
 
-    assert unexpected.value.code == -32602
-    assert unexpected.value.data == {"unexpected": ["surprise"]}
-    assert wrong_type.value.code == -32602
+    assert unexpected["isError"] is True
+    assert "unexpected tool arguments" in unexpected["structuredContent"]["message"]
+    assert wrong_type["isError"] is True

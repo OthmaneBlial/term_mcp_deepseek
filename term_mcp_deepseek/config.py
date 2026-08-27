@@ -34,7 +34,7 @@ class Settings:
     deepseek_api_key: str = ""
     deepseek_model: str = "deepseek-chat"
     deepseek_base_url: str = "https://api.deepseek.com"
-    mcp_version: str = "2025-03-26"
+    mcp_version: str = "2026-07-28"
     workspace_root: str = "."
     auth_token: str = ""
     allowed_origins: tuple[str, ...] = (

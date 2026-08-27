@@ -154,14 +154,14 @@ Chaque requête suit ce flux :
 
 ### Travail
 
-- [ ] Épingler dans la documentation la version de la spécification ciblée et les capacités réellement supportées.
-- [ ] Implémenter le handshake/initialize, la négociation de capacités, la découverte des outils, l’appel d’outil et les erreurs conformément au contrat choisi.
-- [ ] Définir un endpoint MCP unique au lieu de routes pseudo-MCP dispersées ; garder éventuellement les endpoints de compatibilité derrière une version et une dépréciation documentées.
-- [ ] Retourner des content blocks et des erreurs structurées cohérents, y compris pour validation, permission refusée, timeout et commande interrompue.
-- [ ] Supporter correctement les notifications, les ids nullables et les requêtes invalides sans traceback ni fuite de détails internes.
-- [ ] Choisir les transports supportés pour v1 : STDIO obligatoire pour l’usage local ; HTTP/SSE seulement avec session, auth et limites documentées.
-- [ ] Ajouter des fixtures JSON de protocole et des tests de contrat indépendants du modèle DeepSeek.
-- [ ] Vérifier les clients cibles un par un et publier un tableau « testé / non testé » avec version et date.
+- [x] Épingler dans la documentation la version de la spécification ciblée et les capacités réellement supportées.
+- [x] Implémenter le handshake/initialize, la négociation de capacités, la découverte des outils, l’appel d’outil et les erreurs conformément au contrat choisi.
+- [x] Définir un endpoint MCP unique au lieu de routes pseudo-MCP dispersées ; garder éventuellement les endpoints de compatibilité derrière une version et une dépréciation documentées.
+- [x] Retourner des content blocks et des erreurs structurées cohérents, y compris pour validation, permission refusée, timeout et commande interrompue.
+- [x] Supporter correctement les notifications, les ids nullables et les requêtes invalides sans traceback ni fuite de détails internes.
+- [x] Choisir les transports supportés pour v1 : STDIO obligatoire pour l’usage local ; HTTP/SSE seulement avec session, auth et limites documentées.
+- [x] Ajouter des fixtures JSON de protocole et des tests de contrat indépendants du modèle DeepSeek.
+- [x] Vérifier les clients cibles un par un et publier un tableau « testé / non testé » avec version et date.
 
 ### Critères d’acceptation
 
@@ -169,6 +169,8 @@ Chaque requête suit ce flux :
 - Les tests de contrat détectent une régression de schéma avant le merge.
 - Les erreurs de protocole restent valides même lorsque le shell ou l’API DeepSeek est indisponible.
 - La documentation distingue clairement compatibilité MCP, API REST historique et interface web.
+
+**Validation du jalon (2026-08-27) :** 69 tests passent avec 85,96 % de couverture. Le SDK Python MCP officiel 2.1.1 passe en STDIO et Streamable HTTP, en mode moderne `2026-07-28` et legacy `2025-11-25`. MCP Inspector 2.4.0 passe `tools/list` et `tools/call` sur STDIO.
 
 ## P3 — Le produit signature : plan, terminal et receipt
 

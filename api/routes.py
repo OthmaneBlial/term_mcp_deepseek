@@ -9,10 +9,14 @@ from flask import (
     Response,
     current_app,
     jsonify,
+    make_response,
     request,
     send_from_directory,
     stream_with_context,
 )
+
+from term_mcp_deepseek.protocol import stamp_modern_result, validate_http_request
+from tools.json_rpc import JSONRPCError, create_jsonrpc_error
 
 bp = Blueprint("api", __name__)
 
@@ -58,11 +62,46 @@ def mcp_rpc():
             error={"code": -32700, "message": "Parse error"},
             id=None,
         ), 400
+    if not isinstance(payload, dict):
+        return jsonify(create_jsonrpc_error(-32600, "Invalid Request")), 400
+    try:
+        protocol = validate_http_request(
+            payload,
+            request.headers,
+            current_app.extensions["mcp_http_sessions"],
+        )
+    except JSONRPCError as error:
+        return (
+            jsonify(create_jsonrpc_error(error.code, error.message, payload.get("id"), error.data)),
+            error.http_status,
+        )
+
     response = current_app.jsonrpc.dispatch(payload)
+    if protocol.modern:
+        response = stamp_modern_result(response)
     if response is None:
-        return "", 204
-    status = 200 if "result" in response else 400
-    return jsonify(response), status
+        return "", 202
+
+    status = 200
+    if "error" in response:
+        status = 404 if protocol.modern and response["error"]["code"] == -32601 else 400
+    http_response = make_response(jsonify(response), status)
+    http_response.headers["MCP-Protocol-Version"] = protocol.version
+    if protocol.initialize and "result" in response:
+        session = current_app.extensions["mcp_http_sessions"].create(
+            response["result"]["protocolVersion"]
+        )
+        http_response.headers["Mcp-Session-Id"] = session.id
+    return http_response
+
+
+@bp.delete("/mcp")
+def terminate_mcp_session():
+    session_id = request.headers.get("Mcp-Session-Id", "")
+    if not session_id:
+        return jsonify(error="missing_mcp_session_id"), 400
+    closed = current_app.extensions["mcp_http_sessions"].close(session_id)
+    return ("", 200) if closed else (jsonify(error="unknown_mcp_session_id"), 404)
 
 
 @bp.get("/stream")

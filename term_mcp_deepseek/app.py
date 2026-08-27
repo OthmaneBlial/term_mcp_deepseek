@@ -17,6 +17,7 @@ from models.event_bus import EventBus
 from term_mcp_deepseek import __version__
 from term_mcp_deepseek.config import Settings
 from term_mcp_deepseek.execution import ExecutionError
+from term_mcp_deepseek.protocol import LegacyHTTPSessions
 from term_mcp_deepseek.server import MCPServer
 from tools.auth import BearerTokenAuth
 from tools.json_rpc import JSONRPCError, JSONRPCServer
@@ -72,6 +73,10 @@ def create_app(
     }
     app.extensions["request_limiter"] = RequestLimiter(selected.rate_limit_per_minute)
     app.extensions["bearer_auth"] = BearerTokenAuth(selected.auth_token)
+    app.extensions["mcp_http_sessions"] = LegacyHTTPSessions(
+        timeout_seconds=selected.session_timeout,
+        max_sessions=selected.max_concurrent_sessions,
+    )
 
     app.register_blueprint(api_bp)
     if selected.trust_proxy:
@@ -121,19 +126,31 @@ def create_app(
             response.headers["Vary"] = "Origin"
             response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS"
+        if (
+            request.path == "/stream"
+            or request.path == "/chat"
+            or request.path.startswith("/sessions")
+        ):
+            response.headers["Deprecation"] = "true"
+            response.headers["Sunset"] = "Fri, 27 Aug 2027 00:00:00 GMT"
+            response.headers["Link"] = '</docs/MCP_COMPATIBILITY.md>; rel="deprecation"'
         return response
 
     @app.errorhandler(JSONRPCError)
     def handle_jsonrpc_error(error: JSONRPCError):
+        request_payload = request.get_json(silent=True)
+        request_id = request_payload.get("id") if isinstance(request_payload, dict) else None
         payload = {
+            "jsonrpc": "2.0",
+            "id": request_id,
             "error": {
                 "code": error.code,
                 "message": error.message,
-            }
+            },
         }
         if error.data is not None:
             payload["error"]["data"] = error.data
-        return jsonify(payload), 400
+        return jsonify(payload), error.http_status
 
     @app.errorhandler(ExecutionError)
     @app.errorhandler(ValueError)

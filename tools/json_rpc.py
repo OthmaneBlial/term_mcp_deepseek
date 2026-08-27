@@ -8,10 +8,11 @@ from typing import Any
 
 
 class JSONRPCError(Exception):
-    def __init__(self, code: int, message: str, data: Any = None):
+    def __init__(self, code: int, message: str, data: Any = None, http_status: int = 400):
         self.code = code
         self.message = message
         self.data = data
+        self.http_status = http_status
         super().__init__(message)
 
 

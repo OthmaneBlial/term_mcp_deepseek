@@ -4,7 +4,7 @@ def test_health_reports_version(client):
     assert response.status_code == 200
     assert response.get_json()["status"] == "ok"
     assert response.get_json()["version"] == "0.9.0"
-    assert response.headers["X-MCP-Version"] == "2025-03-26"
+    assert response.headers["X-MCP-Version"] == "2026-07-28"
 
 
 def test_root_serves_chat(client):

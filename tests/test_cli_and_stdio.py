@@ -64,7 +64,19 @@ def test_serve_rejects_explicit_weak_token(monkeypatch, tmp_path, capsys):
 
 
 def test_stdio_dispatches_and_keeps_stdout_json_only(tmp_path):
-    reader = io.StringIO('{"jsonrpc":"2.0","method":"tools/list","id":1}\nnot-json\n')
+    request = {
+        "jsonrpc": "2.0",
+        "method": "server/discover",
+        "params": {
+            "_meta": {
+                "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+                "io.modelcontextprotocol/clientInfo": {"name": "tests", "version": "1"},
+                "io.modelcontextprotocol/clientCapabilities": {},
+            }
+        },
+        "id": 1,
+    }
+    reader = io.StringIO(json.dumps(request) + "\nnot-json\n")
     writer = io.StringIO()
     errors = io.StringIO()
 
@@ -77,5 +89,6 @@ def test_stdio_dispatches_and_keeps_stdout_json_only(tmp_path):
     responses = [json.loads(line) for line in writer.getvalue().splitlines()]
 
     assert exit_code == 0
-    assert responses[0]["result"]["tools"]
+    assert responses[0]["result"]["supportedVersions"]
+    assert responses[0]["result"]["resultType"] == "complete"
     assert responses[1]["error"]["code"] == -32700

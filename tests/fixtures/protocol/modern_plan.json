@@ -1,0 +1,19 @@
+{
+  "jsonrpc": "2.0",
+  "id": "plan-fixture",
+  "method": "tools/call",
+  "params": {
+    "name": "terminal_plan",
+    "arguments": {
+      "command": "pwd"
+    },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientInfo": {
+        "name": "contract-fixture",
+        "version": "1.0.0"
+      },
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}

@@ -14,12 +14,17 @@ from term_mcp_deepseek.config import Settings
 from term_mcp_deepseek.domain import ApprovalMode
 from term_mcp_deepseek.execution import ExecutionError, ExecutionService
 from term_mcp_deepseek.policy import CommandPolicy
+from term_mcp_deepseek.protocol import (
+    LEGACY_PROTOCOL_VERSION,
+    SERVER_INFO_META,
+    SUPPORTED_PROTOCOL_VERSIONS,
+)
 from term_mcp_deepseek.validation import validate_message, validate_session_id
 from tools.deepseek_client import DeepSeekClient, DeepseekError
 from tools.json_rpc import JSONRPCError, JSONRPCServer
 
 TOOL_ARGUMENTS = {
-    "terminal_plan": ({"session_id", "command"}, {"cwd"}),
+    "terminal_plan": ({"command"}, {"session_id", "cwd"}),
     "terminal_approve": ({"session_id", "plan_id"}, set()),
     "terminal_execute": ({"session_id", "plan_id"}, set()),
     "terminal_cancel": ({"session_id"}, set()),
@@ -57,17 +62,44 @@ class MCPServer:
         self._conversation_lock = threading.Lock()
 
     def register_methods(self, dispatcher: JSONRPCServer) -> None:
+        dispatcher.register_method("server/discover", self.discover)
         dispatcher.register_method("initialize", self.initialize)
+        dispatcher.register_method("notifications/initialized", self.initialized)
+        dispatcher.register_method("notifications/cancelled", self.cancelled)
         dispatcher.register_method("ping", self.ping)
-        dispatcher.register_method("sessions/create", self.create_session)
-        dispatcher.register_method("sessions/close", self.close_session)
         dispatcher.register_method("tools/list", self.list_tools)
         dispatcher.register_method("tools/call", self.call_tool)
         dispatcher.register_method("prompts/list", self.list_prompts)
         dispatcher.register_method("prompts/get", self.get_prompt)
         dispatcher.register_method("resources/list", self.list_resources)
         dispatcher.register_method("resources/read", self.read_resource)
-        dispatcher.register_method("roots/list", self.list_roots)
+
+    @staticmethod
+    def capabilities() -> dict[str, Any]:
+        return {
+            "tools": {"listChanged": False},
+            "prompts": {"listChanged": False},
+            "resources": {"subscribe": False, "listChanged": False},
+        }
+
+    def discover(self, **_params: Any) -> dict[str, Any]:
+        return {
+            "resultType": "complete",
+            "supportedVersions": list(SUPPORTED_PROTOCOL_VERSIONS),
+            "capabilities": self.capabilities(),
+            "_meta": {
+                SERVER_INFO_META: {
+                    "name": "term-mcp-deepseek",
+                    "version": __version__,
+                }
+            },
+            "instructions": (
+                "Plan terminal commands first. Execute only allowed plans and inspect "
+                "the signed receipt returned by every execution."
+            ),
+            "ttlMs": 3_600_000,
+            "cacheScope": "private",
+        }
 
     def initialize(
         self,
@@ -76,13 +108,13 @@ class MCPServer:
         clientInfo: dict[str, Any] | None = None,
         **_extra: Any,
     ) -> dict[str, Any]:
+        if not isinstance(protocolVersion, str):
+            raise JSONRPCError(-32602, "initialize requires protocolVersion")
+        if not isinstance(capabilities, dict) or not isinstance(clientInfo, dict):
+            raise JSONRPCError(-32602, "initialize requires capabilities and clientInfo objects")
         return {
-            "protocolVersion": self.settings.mcp_version,
-            "capabilities": {
-                "tools": {"listChanged": False},
-                "prompts": {"listChanged": False},
-                "resources": {"subscribe": False, "listChanged": False},
-            },
+            "protocolVersion": LEGACY_PROTOCOL_VERSION,
+            "capabilities": self.capabilities(),
             "serverInfo": {
                 "name": "term-mcp-deepseek",
                 "version": __version__,
@@ -94,7 +126,15 @@ class MCPServer:
         }
 
     @staticmethod
-    def ping() -> dict[str, bool]:
+    def initialized(**_params: Any) -> dict[str, bool]:
+        return {"accepted": True}
+
+    @staticmethod
+    def cancelled(**_params: Any) -> dict[str, bool]:
+        return {"accepted": True}
+
+    @staticmethod
+    def ping(**_params: Any) -> dict[str, bool]:
         return {"ok": True}
 
     def create_session(self) -> dict[str, str]:
@@ -106,11 +146,15 @@ class MCPServer:
             self._conversations.pop(session_id, None)
         return {"closed": True}
 
-    def list_tools(self) -> dict[str, list[dict[str, Any]]]:
+    def list_tools(self, cursor: str | None = None, **_params: Any) -> dict[str, Any]:
+        if cursor is not None:
+            raise JSONRPCError(-32602, "This catalog has no additional page")
         return {
+            "resultType": "complete",
             "tools": [
                 {
                     "name": "terminal_plan",
+                    "title": "Plan a bounded terminal command",
                     "description": (
                         "Validate a command against the workspace policy and create "
                         "a non-executing plan."
@@ -122,12 +166,15 @@ class MCPServer:
                             "command": {"type": "string"},
                             "cwd": {"type": "string"},
                         },
-                        "required": ["session_id", "command"],
+                        "required": ["command"],
                         "additionalProperties": False,
                     },
+                    "outputSchema": {"type": "object"},
+                    "annotations": {"readOnlyHint": True, "destructiveHint": False},
                 },
                 {
                     "name": "terminal_approve",
+                    "title": "Approve a terminal plan",
                     "description": "Explicitly approve a plan that requires confirmation.",
                     "inputSchema": {
                         "type": "object",
@@ -138,9 +185,12 @@ class MCPServer:
                         "required": ["session_id", "plan_id"],
                         "additionalProperties": False,
                     },
+                    "outputSchema": {"type": "object"},
+                    "annotations": {"readOnlyHint": False, "destructiveHint": False},
                 },
                 {
                     "name": "terminal_execute",
+                    "title": "Execute an approved terminal plan",
                     "description": "Execute an allowed plan and return a signed receipt.",
                     "inputSchema": {
                         "type": "object",
@@ -151,9 +201,12 @@ class MCPServer:
                         "required": ["session_id", "plan_id"],
                         "additionalProperties": False,
                     },
+                    "outputSchema": {"type": "object"},
+                    "annotations": {"readOnlyHint": False, "destructiveHint": True},
                 },
                 {
                     "name": "terminal_cancel",
+                    "title": "Cancel the active command",
                     "description": "Cancel the active command for one session.",
                     "inputSchema": {
                         "type": "object",
@@ -161,9 +214,12 @@ class MCPServer:
                         "required": ["session_id"],
                         "additionalProperties": False,
                     },
+                    "outputSchema": {"type": "object"},
+                    "annotations": {"readOnlyHint": False, "destructiveHint": True},
                 },
                 {
                     "name": "terminal_receipt",
+                    "title": "Read the latest signed receipt",
                     "description": "Read the latest execution receipt for one session.",
                     "inputSchema": {
                         "type": "object",
@@ -171,18 +227,30 @@ class MCPServer:
                         "required": ["session_id"],
                         "additionalProperties": False,
                     },
+                    "outputSchema": {"type": "object"},
+                    "annotations": {"readOnlyHint": True, "destructiveHint": False},
                 },
-            ]
+            ],
+            "ttlMs": 300_000,
+            "cacheScope": "private",
         }
 
-    def call_tool(self, name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
+    def call_tool(
+        self,
+        name: str,
+        arguments: dict[str, Any] | None = None,
+        **_params: Any,
+    ) -> dict[str, Any]:
         arguments = arguments or {}
         try:
             if name in TOOL_ARGUMENTS:
                 self._validate_tool_arguments(name, arguments)
             if name == "terminal_plan":
+                session_id = arguments.get("session_id")
+                if session_id is None:
+                    session_id = self.execution.create_session()["session_id"]
                 plan = self.execution.plan(
-                    session_id=arguments["session_id"],
+                    session_id=session_id,
                     command=arguments["command"],
                     cwd=arguments.get("cwd"),
                 )
@@ -198,7 +266,10 @@ class MCPServer:
                     arguments["session_id"],
                     arguments["plan_id"],
                 )
-                return self._tool_result(receipt.to_dict())
+                return self._tool_result(
+                    receipt.to_dict(),
+                    is_error=receipt.status.value != "succeeded",
+                )
             if name == "terminal_cancel":
                 return self._tool_result(
                     {"cancelled": self.execution.cancel(arguments["session_id"])}
@@ -212,10 +283,10 @@ class MCPServer:
                 "send_control_character",
             }:
                 raise JSONRPCError(
-                    -32601,
+                    -32602,
                     "Direct terminal tools were removed; use plan/approve/execute",
                 )
-            raise JSONRPCError(-32601, "Unknown tool", {"name": name})
+            raise JSONRPCError(-32602, "Unknown tool", {"name": name})
         except KeyError as error:
             raise JSONRPCError(
                 -32602,
@@ -223,10 +294,13 @@ class MCPServer:
                 {"argument": str(error)},
             ) from error
         except (ExecutionError, ValueError) as error:
-            raise JSONRPCError(-32010, str(error)) from error
+            return self._tool_error(str(error))
 
-    def list_prompts(self) -> dict[str, list[dict[str, Any]]]:
+    def list_prompts(self, cursor: str | None = None, **_params: Any) -> dict[str, Any]:
+        if cursor is not None:
+            raise JSONRPCError(-32602, "This catalog has no additional page")
         return {
+            "resultType": "complete",
             "prompts": [
                 {
                     "name": "safe_terminal_task",
@@ -239,16 +313,17 @@ class MCPServer:
                         }
                     ],
                 }
-            ]
+            ],
         }
 
     def get_prompt(
         self,
         name: str,
         arguments: dict[str, Any] | None = None,
+        **_params: Any,
     ) -> dict[str, Any]:
         if name != "safe_terminal_task":
-            raise JSONRPCError(-32601, "Unknown prompt", {"name": name})
+            raise JSONRPCError(-32602, "Unknown prompt", {"name": name})
         task = (arguments or {}).get("task", "")
         return {
             "description": "Plan a safe terminal task",
@@ -266,7 +341,9 @@ class MCPServer:
             ],
         }
 
-    def list_resources(self) -> dict[str, list[dict[str, str]]]:
+    def list_resources(self, cursor: str | None = None, **_params: Any) -> dict[str, Any]:
+        if cursor is not None:
+            raise JSONRPCError(-32602, "This catalog has no additional page")
         root = Path(self.settings.workspace_root)
         resources: list[dict[str, str]] = [
             {
@@ -289,9 +366,9 @@ class MCPServer:
                         "mimeType": "text/plain",
                     }
                 )
-        return {"resources": resources}
+        return {"resultType": "complete", "resources": resources}
 
-    def read_resource(self, uri: str) -> dict[str, list[dict[str, str]]]:
+    def read_resource(self, uri: str, **_params: Any) -> dict[str, list[dict[str, str]]]:
         prefix = "workspace:///"
         if not uri.startswith(prefix):
             raise JSONRPCError(-32602, "Only workspace resources are supported")
@@ -370,6 +447,7 @@ class MCPServer:
             "version": __version__,
             "description": "Safe local terminal planning and execution over MCP",
             "protocol_version": self.settings.mcp_version,
+            "supported_protocol_versions": list(SUPPORTED_PROTOCOL_VERSIONS),
             "approval_mode": self.settings.approval_mode,
             "workspace": str(Path(self.settings.workspace_root)),
             "transports": ["http", "stdio"],
@@ -377,8 +455,9 @@ class MCPServer:
         }
 
     @staticmethod
-    def _tool_result(value: dict[str, Any]) -> dict[str, Any]:
+    def _tool_result(value: dict[str, Any], *, is_error: bool = False) -> dict[str, Any]:
         return {
+            "resultType": "complete",
             "content": [
                 {
                     "type": "text",
@@ -386,7 +465,17 @@ class MCPServer:
                 }
             ],
             "structuredContent": value,
-            "isError": False,
+            "isError": is_error,
+        }
+
+    @staticmethod
+    def _tool_error(message: str) -> dict[str, Any]:
+        value = {"code": "tool_execution_error", "message": message}
+        return {
+            "resultType": "complete",
+            "content": [{"type": "text", "text": message}],
+            "structuredContent": value,
+            "isError": True,
         }
 
     @staticmethod
@@ -398,20 +487,16 @@ class MCPServer:
         missing = sorted(required - supplied)
         unexpected = sorted(supplied - required - optional)
         if missing:
-            raise JSONRPCError(-32602, "Missing tool arguments", {"missing": missing})
+            raise ValueError(f"missing required tool arguments: {', '.join(missing)}")
         if unexpected:
-            raise JSONRPCError(-32602, "Unexpected tool arguments", {"unexpected": unexpected})
+            raise ValueError(f"unexpected tool arguments: {', '.join(unexpected)}")
         invalid = sorted(
             key
             for key in supplied
             if not isinstance(arguments[key], str) or not arguments[key].strip()
         )
         if invalid:
-            raise JSONRPCError(
-                -32602,
-                "Tool arguments must be non-empty strings",
-                {"invalid": invalid},
-            )
+            raise ValueError(f"tool arguments must be non-empty strings: {', '.join(invalid)}")
 
 
 __all__ = ["MCPServer"]
