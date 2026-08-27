@@ -29,6 +29,16 @@ def chat():
     return jsonify(resp), 200
 
 
+@bp.post("/sessions")
+def create_session():
+    return jsonify(current_app.mcp.create_session()), 201
+
+
+@bp.delete("/sessions/<session_id>")
+def close_session(session_id: str):
+    return jsonify(current_app.mcp.close_session(session_id)), 200
+
+
 @bp.get("/")
 def root():
     return send_from_directory(current_app.static_folder, "chat.html")
@@ -58,6 +68,7 @@ def mcp_rpc():
 @bp.get("/stream")
 def stream():
     session_id = request.args.get("session_id") or "default"
+    current_app.mcp.execution.sessions.get(session_id)
     q = current_app.event_bus.get(session_id)
 
     def _sse(data: dict, event: str | None = None):

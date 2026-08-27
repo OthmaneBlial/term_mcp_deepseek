@@ -7,11 +7,10 @@ import logging
 import sys
 from typing import TextIO
 
-import pexpect
-
-from mcp_server import MCPServer
+from models.event_bus import EventBus
 from term_mcp_deepseek.app import build_dispatcher
 from term_mcp_deepseek.config import Settings
+from term_mcp_deepseek.server import MCPServer
 from tools.json_rpc import create_jsonrpc_error
 
 
@@ -26,8 +25,9 @@ def serve_streams(
         format="%(levelname)s %(message)s",
         stream=error_writer,
     )
-    shell = pexpect.spawn("/bin/bash", encoding="utf-8", echo=False)
-    dispatcher = build_dispatcher(MCPServer(shell))
+    event_bus = EventBus()
+    mcp = MCPServer(settings, event_bus)
+    dispatcher = build_dispatcher(mcp)
     try:
         for raw_line in reader:
             line = raw_line.strip()
@@ -43,8 +43,7 @@ def serve_streams(
                 writer.write(json.dumps(response, separators=(",", ":")) + "\n")
                 writer.flush()
     finally:
-        if shell.isalive():
-            shell.close(force=True)
+        mcp.execution.sessions.close_all()
     return 0
 
 

@@ -14,8 +14,8 @@ def test_root_serves_chat(client):
     assert b"Term MCP DeepSeek" in response.data
 
 
-def test_info_uses_package_version(client):
-    response = client.get("/mcp/info")
+def test_info_uses_package_version(client, auth_headers):
+    response = client.get("/mcp/info", headers=auth_headers)
 
     assert response.status_code == 200
     assert response.get_json()["version"] == "0.9.0"

@@ -14,11 +14,15 @@ Requirements: Python 3.10 or newer and Bash.
     git clone https://github.com/OthmaneBlial/term_mcp_deepseek.git
     cd term_mcp_deepseek
     cp .env.example .env
+    ./startup.sh token
+
+Copy the generated value into AUTH_TOKEN in ".env", then start the server:
+
     ./startup.sh
 
 The server listens on http://127.0.0.1:8000 by default.
 
-The DeepSeek key is optional for health checks, tool discovery, STDIO and local protocol tests. Add DEEPSEEK_API_KEY to ".env" only when using chat.
+AUTH_TOKEN must contain at least 32 characters when provided. If it is omitted, `term-mcp serve` generates a strong ephemeral token and prints it once at startup. The DeepSeek key is optional for health checks, tool discovery, STDIO and local protocol tests. Add DEEPSEEK_API_KEY to ".env" only when using chat.
 
 ## One CLI
 
@@ -26,6 +30,7 @@ The DeepSeek key is optional for health checks, tool discovery, STDIO and local 
     term-mcp stdio
     term-mcp doctor
     term-mcp version
+    term-mcp token
 
 The compatibility files "server.py" and "stdio_server.py" delegate to this CLI; they do not contain separate server implementations.
 
@@ -35,7 +40,9 @@ The compatibility files "server.py" and "stdio_server.py" delegate to this CLI; 
 | --- | --- | --- |
 | GET | /health | Readiness and package version |
 | GET | / | Local chat interface |
-| POST | /chat | DeepSeek chat bridge |
+| POST | /sessions | Create an isolated execution session |
+| DELETE | /sessions/{id} | Close a session and cancel its process |
+| POST | /chat | DeepSeek planning chat; never executes text |
 | GET | /mcp/info | Declared capabilities |
 | POST | /mcp | JSON-RPC dispatcher |
 | GET | /stream?session_id=... | SSE session events |
@@ -43,6 +50,7 @@ The compatibility files "server.py" and "stdio_server.py" delegate to this CLI; 
 Example tool discovery:
 
     curl http://127.0.0.1:8000/mcp \
+      -H "Authorization: Bearer $AUTH_TOKEN" \
       -H "Content-Type: application/json" \
       -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'
 
@@ -53,11 +61,11 @@ STDOUT contains JSON-RPC responses only; diagnostics are written to STDERR.
     printf '%s\n' '{"jsonrpc":"2.0","method":"tools/list","id":1}' \
       | python -m term_mcp_deepseek stdio
 
-HTTP and STDIO use the same dispatcher and business methods.
+HTTP and STDIO use the same dispatcher and business methods. STDIO is authorized by the parent process and does not require the HTTP bearer token.
 
 ## Docker
 
-    docker compose up --build
+    AUTH_TOKEN=replace-with-a-strong-token docker compose up --build
 
 The container and health check use port 8000. The repository is mounted read-write at "/workspace" in the development compose profile.
 
@@ -73,7 +81,7 @@ The full, dependency-ordered plan is in [ROADMAP.md](ROADMAP.md). The central pr
 
     plan → risk analysis → approval → bounded execution → receipt
 
-Security limits are documented honestly as they are implemented. A passing syntax check or a decorative badge is not treated as proof of protocol compatibility or production readiness.
+The current terminal flow never executes model text. Clients must create a session and use terminal_plan, terminal_approve when required, then terminal_execute. Commands are parsed without a shell, constrained to the configured workspace, bounded by time and output limits, and recorded as signed redacted receipts.
 
 ## License
 

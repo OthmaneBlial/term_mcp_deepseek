@@ -23,8 +23,6 @@ classifiers = [
 dependencies = [
   "Flask>=2.3.3,<4",
   "PyJWT>=2.9,<3",
-  "pexpect>=4.8,<5",
-  "psutil>=5.9,<8",
   "python-dotenv>=1.0,<2",
   "requests>=2.31,<3",
 ]

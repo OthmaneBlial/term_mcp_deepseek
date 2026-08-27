@@ -5,6 +5,9 @@ services:
       - "8000:8000"
     environment:
       DEEPSEEK_API_KEY: "$DEEPSEEK_API_KEY"
+      AUTH_TOKEN: "$AUTH_TOKEN"
+      ALLOWED_ORIGINS: "http://127.0.0.1:8000,http://localhost:8000"
+      APPROVAL_MODE: "inspect"
       HOST: "0.0.0.0"
       PORT: "8000"
       DEBUG: "false"

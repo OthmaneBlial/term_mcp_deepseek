@@ -89,18 +89,18 @@ DeepSeek reste le premier fournisseur de modèle. MCP devient l’interface inte
 
 ### Travail
 
-- [ ] Choisir "create_app()" comme point d’entrée unique et supprimer la divergence entre "server.py" et "server_new.py".
-- [ ] Fusionner "config.py" et "config_new.py" dans une configuration typée, documentée et validée au démarrage.
-- [ ] Remplacer les secrets par défaut par un échec explicite avec message d’aide ; ne jamais démarrer en mode dangereux par accident.
-- [ ] Réécrire "startup.sh" en script court et déterministe : ne garder qu’un chemin actif, supprimer le code mort après "exec", respecter "HOST" et "PORT" fournis par l’environnement.
-- [ ] Ajouter une CLI stable, par exemple "term-mcp serve", "term-mcp stdio", "term-mcp doctor" et "term-mcp version".
-- [ ] Décider une convention de port et l’utiliser dans ".env.example", Docker, le health check, le README et les tests.
-- [ ] Séparer clairement les trois couches : transport, protocole MCP/JSON-RPC et exécution terminale.
-- [ ] Refondre "JSONRPCServer" pour recevoir une requête en argument au lieu de dépendre directement du contexte Flask ; le transport HTTP et le transport STDIO doivent partager le même dispatcher.
-- [ ] Corriger le mode STDIO : aucune sortie non JSON sur stdout, logs uniquement sur stderr, gestion de l’EOF, des erreurs de parsing, des notifications et des ids.
-- [ ] Écrire un test de fumée sans clé DeepSeek : démarrage, "/health", découverte des outils, erreur structurée et arrêt propre.
-- [ ] Faire tourner toute la suite avec "python -m pytest", supprimer la sélection artificielle dans la CI et publier la couverture réellement mesurée.
-- [ ] Ajouter un linter et un formatteur reproductibles, avec une configuration minimale et un job CI dédié.
+- [x] Choisir "create_app()" comme point d’entrée unique et supprimer la divergence entre "server.py" et "server_new.py".
+- [x] Fusionner "config.py" et "config_new.py" dans une configuration typée, documentée et validée au démarrage.
+- [x] Remplacer les secrets par défaut par un échec explicite avec message d’aide ; ne jamais démarrer en mode dangereux par accident.
+- [x] Réécrire "startup.sh" en script court et déterministe : ne garder qu’un chemin actif, supprimer le code mort après "exec", respecter "HOST" et "PORT" fournis par l’environnement.
+- [x] Ajouter une CLI stable, par exemple "term-mcp serve", "term-mcp stdio", "term-mcp doctor" et "term-mcp version".
+- [x] Décider une convention de port et l’utiliser dans ".env.example", Docker, le health check, le README et les tests.
+- [x] Séparer clairement les trois couches : transport, protocole MCP/JSON-RPC et exécution terminale.
+- [x] Refondre "JSONRPCServer" pour recevoir une requête en argument au lieu de dépendre directement du contexte Flask ; le transport HTTP et le transport STDIO doivent partager le même dispatcher.
+- [x] Corriger le mode STDIO : aucune sortie non JSON sur stdout, logs uniquement sur stderr, gestion de l’EOF, des erreurs de parsing, des notifications et des ids.
+- [x] Écrire un test de fumée sans clé DeepSeek : démarrage, "/health", découverte des outils, erreur structurée et arrêt propre.
+- [x] Faire tourner toute la suite avec "python -m pytest", supprimer la sélection artificielle dans la CI et publier la couverture réellement mesurée.
+- [x] Ajouter un linter et un formatteur reproductibles, avec une configuration minimale et un job CI dédié.
 
 ### Critères d’acceptation
 
@@ -123,21 +123,21 @@ Chaque requête suit ce flux :
 
 ### Travail
 
-- [ ] Retirer le protocole implicite "CMD:". Le modèle ne doit jamais déclencher une commande simplement parce qu’une ligne de texte contient ce préfixe.
-- [ ] Définir un schéma de tool call strict : nom, arguments validés, mode d’approbation, répertoire de travail et limites d’exécution.
-- [ ] Ajouter trois modes explicites : "inspect" (lecture seule), "confirm" (approbation par action) et "trusted" (périmètre préconfiguré, toujours journalisé).
-- [ ] Exiger l’approbation pour l’écriture, la suppression, les changements de permissions, le réseau, les processus et les commandes composées.
-- [ ] Remplacer le filtrage de motifs par une politique composée d’un workspace root, d’un allowlist de capacités et de limites de système.
-- [ ] Refuser par défaut les chemins hors workspace, les symlinks sortants, les devices, les pipes réseau vers un shell, les élévations et les actions sur le système hôte.
-- [ ] Isoler un shell par session, ou utiliser un runner dédié ; ne plus partager un Bash global entre utilisateurs et sessions.
-- [ ] Ajouter timeout dur, annulation, taille maximale de stdout/stderr, nombre maximal de processus, code de sortie et signal dans le résultat.
-- [ ] Corriger le suivi d’état : le résultat doit distinguer "planned", "approved", "running", "succeeded", "failed", "cancelled" et "timed_out".
-- [ ] Activer l’authentification sur tous les endpoints qui lisent ou modifient un environnement ; générer un secret aléatoire si l’utilisateur n’en fournit pas et refuser les secrets faibles.
-- [ ] Remplacer "Access-Control-Allow-Origin: *" par une allowlist explicite ; documenter le cas local et le cas derrière reverse proxy.
-- [ ] Ne jamais journaliser les tokens, les headers Authorization, les prompts complets par défaut ou des sorties contenant des secrets connus.
-- [ ] Ajouter "audit.jsonl" ou une sortie équivalente opt-in, avec hash de la commande, politique appliquée, approbation, durée, code retour et empreinte de session.
-- [ ] Limiter les resources et roots à un espace autorisé. Ne pas exposer automatiquement "file:///", le home ou tout le système.
-- [ ] Écrire un threat model court : prompt injection, exfiltration, path traversal, commande composée, abus du SSE, fuite inter-session, logs sensibles et déni de service.
+- [x] Retirer le protocole implicite "CMD:". Le modèle ne doit jamais déclencher une commande simplement parce qu’une ligne de texte contient ce préfixe.
+- [x] Définir un schéma de tool call strict : nom, arguments validés, mode d’approbation, répertoire de travail et limites d’exécution.
+- [x] Ajouter trois modes explicites : "inspect" (lecture seule), "confirm" (approbation par action) et "trusted" (périmètre préconfiguré, toujours journalisé).
+- [x] Exiger l’approbation pour l’écriture, la suppression, les changements de permissions, le réseau, les processus et les commandes composées.
+- [x] Remplacer le filtrage de motifs par une politique composée d’un workspace root, d’un allowlist de capacités et de limites de système.
+- [x] Refuser par défaut les chemins hors workspace, les symlinks sortants, les devices, les pipes réseau vers un shell, les élévations et les actions sur le système hôte.
+- [x] Isoler un shell par session, ou utiliser un runner dédié ; ne plus partager un Bash global entre utilisateurs et sessions.
+- [x] Ajouter timeout dur, annulation, taille maximale de stdout/stderr, nombre maximal de processus, code de sortie et signal dans le résultat.
+- [x] Corriger le suivi d’état : le résultat doit distinguer "planned", "approved", "running", "succeeded", "failed", "cancelled" et "timed_out".
+- [x] Activer l’authentification sur tous les endpoints qui lisent ou modifient un environnement ; générer un secret aléatoire si l’utilisateur n’en fournit pas et refuser les secrets faibles.
+- [x] Remplacer "Access-Control-Allow-Origin: *" par une allowlist explicite ; documenter le cas local et le cas derrière reverse proxy.
+- [x] Ne jamais journaliser les tokens, les headers Authorization, les prompts complets par défaut ou des sorties contenant des secrets connus.
+- [x] Ajouter "audit.jsonl" ou une sortie équivalente opt-in, avec hash de la commande, politique appliquée, approbation, durée, code retour et empreinte de session.
+- [x] Limiter les resources et roots à un espace autorisé. Ne pas exposer automatiquement "file:///", le home ou tout le système.
+- [x] Écrire un threat model court : prompt injection, exfiltration, path traversal, commande composée, abus du SSE, fuite inter-session, logs sensibles et déni de service.
 
 ### Critères d’acceptation
 
