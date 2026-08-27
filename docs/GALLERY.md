@@ -31,6 +31,7 @@ The command, workspace, arguments, stdout, and stderr are absent from shared fix
 | --- | --- | --- | --- |
 | What is in this unfamiliar repository? | `term-mcp recipe run examples/recipes/inspect-repository.json --workspace .` | inspect, no network, no writes | [inspect-repository.json](../examples/recipes/inspect-repository.json) |
 | Where are the tests and their configuration? | `term-mcp recipe run examples/recipes/diagnose-tests.json --workspace .` | inspect, no network, no writes | [diagnose-tests.json](../examples/recipes/diagnose-tests.json) |
+| Which JavaScript or TypeScript test surfaces are present? | `term-mcp recipe run examples/recipes/discover-javascript-tests.json --workspace /path/to/js-project` | inspect, no network, no writes | [discover-javascript-tests.json](../examples/recipes/discover-javascript-tests.json) |
 | Which local log files exist? | `term-mcp recipe run examples/recipes/analyze-logs.json --workspace .` | inspect, no network, no writes | [analyze-logs.json](../examples/recipes/analyze-logs.json) |
 | Do service-port declarations agree? | `term-mcp recipe run examples/recipes/verify-port-config.json --workspace .` | inspect, no network, no writes | [verify-port-config.json](../examples/recipes/verify-port-config.json) |
 | Does the public catalog stay inside the read-only boundary? | `term-mcp recipe run examples/recipes/read-only-boundary.json --workspace .` | inspect, no network, no writes | [read-only-boundary.json](../examples/recipes/read-only-boundary.json) |

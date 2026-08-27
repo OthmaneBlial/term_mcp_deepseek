@@ -98,7 +98,7 @@ Run a complete local quality gate with:
 
 ## Safe recipe catalog
 
-The repository includes five small workflows for repository inspection, test discovery, log inventory, port configuration, and proof of the read-only boundary. Every recipe is schema-versioned, inspect-only, network-free, write-free, bounded, and checked by the production policy before it can run.
+The repository includes six small workflows for repository inspection, Python and JavaScript test discovery, log inventory, port configuration, and proof of the read-only boundary. Every recipe is schema-versioned, inspect-only, network-free, write-free, bounded, and checked by the production policy before it can run.
 
 ```bash
 term-mcp recipe validate examples/recipes/*.json --workspace .

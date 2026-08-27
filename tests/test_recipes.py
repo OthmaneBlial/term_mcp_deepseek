@@ -10,7 +10,7 @@ RECIPE_ROOT = Path(__file__).parents[1] / "examples" / "recipes"
 def test_all_public_recipes_are_strict_and_safe():
     paths = sorted(RECIPE_ROOT.glob("*.json"))
 
-    assert len(paths) == 5
+    assert len(paths) == 6
     assert all(validate_recipe(load_recipe(path), Path.cwd()) == [] for path in paths)
 
 
