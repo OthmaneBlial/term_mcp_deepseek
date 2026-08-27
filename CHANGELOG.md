@@ -4,6 +4,15 @@ All notable changes are documented here. The project follows [Semantic Versionin
 
 ## [Unreleased]
 
+### Added
+
+- A portable project website with interactive policy examples, web documentation, real receipt evidence, safe recipe downloads, and responsive accessibility checks.
+- Automated validation for project-subpath-safe links, copied evidence, sitemap integrity, and browser JavaScript syntax.
+
+### Changed
+
+- Linked the live project website from the README and package metadata.
+
 ## [1.0.0] - 2026-08-27
 
 ### Added

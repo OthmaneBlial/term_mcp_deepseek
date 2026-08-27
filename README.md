@@ -7,10 +7,13 @@
 [![Release](https://img.shields.io/github/v/release/OthmaneBlial/term_mcp_deepseek?label=release)](https://github.com/OthmaneBlial/term_mcp_deepseek/releases/latest)
 [![Release assets](https://img.shields.io/github/downloads/OthmaneBlial/term_mcp_deepseek/total?label=release%20assets)](https://github.com/OthmaneBlial/term_mcp_deepseek/releases)
 [![MCP compatibility](https://img.shields.io/badge/MCP-STDIO%20%2B%20HTTP%20tested-1f6feb)](docs/MCP_COMPATIBILITY.md)
+[![Project website](https://img.shields.io/badge/website-live-7dffbd)](https://othmaneblial.github.io/term_mcp_deepseek/)
 
 **See the command, risk, workspace, and limits before anything runs. Then keep a signed receipt of what actually happened.**
 
 Term MCP DeepSeek is a local, approval-first terminal control plane for MCP clients and humans. It gives DeepSeek an isolated advisory role while deterministic policy owns command planning, approval, bounded execution, live events, and signed evidence.
+
+**[Explore the interactive project website →](https://othmaneblial.github.io/term_mcp_deepseek/)**
 
 ![Term MCP DeepSeek approval-first mission control](docs/assets/mission-control.png)
 
@@ -181,6 +184,7 @@ Do not commit `.env`. Add `DEEPSEEK_API_KEY` only for the optional advisor panel
 
 | Area | Source of truth |
 | --- | --- |
+| Interactive overview and web docs | [Project website](https://othmaneblial.github.io/term_mcp_deepseek/) |
 | Product and trust boundaries | [Architecture](docs/ARCHITECTURE.md) |
 | Supported and unsupported behavior | [Feature matrix](docs/FEATURES.md) |
 | MCP versions and clients | [Compatibility](docs/MCP_COMPATIBILITY.md) |

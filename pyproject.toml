@@ -48,9 +48,12 @@ dev = [
 term-mcp = "term_mcp_deepseek.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/OthmaneBlial/term_mcp_deepseek"
+Homepage = "https://othmaneblial.github.io/term_mcp_deepseek/"
+Documentation = "https://othmaneblial.github.io/term_mcp_deepseek/docs.html"
 Repository = "https://github.com/OthmaneBlial/term_mcp_deepseek"
 Issues = "https://github.com/OthmaneBlial/term_mcp_deepseek/issues"
+Changelog = "https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/CHANGELOG.md"
+Security = "https://github.com/OthmaneBlial/term_mcp_deepseek/security/policy"
 
 [tool.setuptools]
 include-package-data = true
