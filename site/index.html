@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Approval-first MCP terminal control with visible policy decisions, bounded execution, and signed receipts."
+    />
+    <meta name="theme-color" content="#07100d" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Term MCP DeepSeek — Make terminal work legible" />
+    <meta
+      property="og:description"
+      content="See the command, risk, workspace, and limits before anything runs. Keep signed evidence after it does."
+    />
+    <meta
+      property="og:image"
+      content="https://othmaneblial.github.io/term_mcp_deepseek/assets/mission-control.jpg"
+    />
+    <meta property="og:url" content="https://othmaneblial.github.io/term_mcp_deepseek/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://othmaneblial.github.io/term_mcp_deepseek/" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Term MCP DeepSeek — Approval-first terminal control</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Term MCP DeepSeek",
+        "codeRepository": "https://github.com/OthmaneBlial/term_mcp_deepseek",
+        "license": "https://opensource.org/license/mit",
+        "programmingLanguage": "Python",
+        "runtimePlatform": "macOS and Linux",
+        "description": "Approval-first MCP terminal control plane with bounded execution and signed receipts."
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header" data-header>
+      <a class="brand" href="index.html" aria-label="Term MCP DeepSeek home">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>
+        <span>
+          <strong>TERM / MCP</strong>
+          <small>DEEPSEEK MISSION CONTROL</small>
+        </span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span>Menu</span>
+        <span class="menu-bars" aria-hidden="true"></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+        <a href="#boundary">Boundary</a>
+        <a href="#proof">Proof</a>
+        <a href="#recipes">Recipes</a>
+        <a href="docs.html">Docs</a>
+        <a class="nav-github" href="https://github.com/OthmaneBlial/term_mcp_deepseek">
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy reveal">
+          <div class="eyebrow">
+            <span class="status-dot" aria-hidden="true"></span>
+            v1.0 · LOCAL / READY
+          </div>
+          <h1 id="hero-title">Make terminal work <em>legible</em> before it runs.</h1>
+          <p class="hero-lede">
+            An approval-first MCP control plane. See the command, risk, workspace, and hard
+            limits before execution—then keep a signed receipt of what actually happened.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#install">Get a result in 60 seconds</a>
+            <a class="button button-ghost" href="#proof">Inspect the evidence</a>
+          </div>
+          <dl class="hero-facts" aria-label="Project proof points">
+            <div><dt>94</dt><dd>tests</dd></div>
+            <div><dt>2</dt><dd>MCP eras</dd></div>
+            <div><dt>0</dt><dd>mandatory telemetry</dd></div>
+            <div><dt>6</dt><dd>safe recipes</dd></div>
+          </dl>
+        </div>
+
+        <div class="hero-art reveal reveal-late" aria-label="Execution boundary overview">
+          <div class="era-stamp" aria-label="MCP protocol version">
+            <span>MCP</span>
+            <strong>2026-07-28</strong>
+            <small>DUAL ERA</small>
+          </div>
+          <div class="signal-card signal-command">
+            <span class="signal-label">INTENT / 01</span>
+            <code>$ pwd</code>
+          </div>
+          <div class="boundary-line" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div class="signal-card signal-policy">
+            <span class="signal-label">POLICY / 02</span>
+            <strong>LOW RISK</strong>
+            <small>read-only · no network</small>
+          </div>
+          <div class="receipt-mini">
+            <div class="receipt-mini-head">
+              <span>EXECUTION RECEIPT</span>
+              <span>14 ms</span>
+            </div>
+            <strong>SUCCEEDED</strong>
+            <dl>
+              <div><dt>MODE</dt><dd>inspect</dd></div>
+              <div><dt>EXIT</dt><dd>0</dd></div>
+              <div><dt>SIGNATURE</dt><dd>verified</dd></div>
+            </dl>
+            <div class="receipt-signature">9f1352c…d9be</div>
+          </div>
+          <p class="art-caption">INTENT → PLAN → POLICY → APPROVAL → PROCESS → RECEIPT</p>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="Safety defaults">
+        <span>MODEL TEXT NEVER EXECUTES</span>
+        <span>INSPECT MODE BY DEFAULT</span>
+        <span>NO SHELL COMPOSITION</span>
+        <span>WORKSPACE CONFINED</span>
+        <span>SIGNED FINAL STATES</span>
+      </section>
+
+      <section class="section boundary-section" id="boundary" aria-labelledby="boundary-title">
+        <div class="section-index">01 / BOUNDARY</div>
+        <div class="section-heading">
+          <p class="kicker">A visible decision, not an opaque leap</p>
+          <h2 id="boundary-title">The model advises.<br />The policy decides.</h2>
+          <p>
+            DeepSeek is optional and isolated. Every proposed command enters a deterministic
+            path that resolves permissions, risk, workspace, network access, timeout, and
+            output limits before execution is possible.
+          </p>
+        </div>
+
+        <div class="policy-lab" data-policy-lab>
+          <div class="lab-toolbar">
+            <span>POLICY LAB / NO COMMANDS RUN HERE</span>
+            <span class="lab-ready"><i aria-hidden="true"></i> ENGINE READY</span>
+          </div>
+          <div class="lab-body">
+            <div class="lab-commands" aria-label="Example command policy decisions">
+              <p>SELECT AN INTENT</p>
+              <button
+                class="lab-command is-active"
+                type="button"
+                aria-pressed="true"
+                data-command="pwd"
+                data-risk="LOW RISK"
+                data-decision="ALLOWED"
+                data-mode="inspect"
+                data-network="denied"
+                data-approval="not required"
+                data-reason="Read-only command inside the selected workspace."
+              >
+                <span>01</span><code>pwd</code><b>inspect</b>
+              </button>
+              <button
+                class="lab-command"
+                type="button"
+                aria-pressed="false"
+                data-command="sleep 15"
+                data-risk="MEDIUM RISK"
+                data-decision="PLAN ONLY"
+                data-mode="confirm"
+                data-network="denied"
+                data-approval="required"
+                data-reason="Long-running process requires explicit approval and remains cancellable."
+              >
+                <span>02</span><code>sleep 15</code><b>confirm</b>
+              </button>
+              <button
+                class="lab-command"
+                type="button"
+                aria-pressed="false"
+                data-command="curl example.com"
+                data-risk="BLOCKED"
+                data-decision="DENIED"
+                data-mode="inspect"
+                data-network="requested"
+                data-approval="unavailable"
+                data-reason="Network clients are outside the inspect-mode capability allowlist."
+              >
+                <span>03</span><code>curl example.com</code><b>blocked</b>
+              </button>
+            </div>
+
+            <div class="lab-decision" aria-live="polite">
+              <div class="decision-topline">
+                <span>POLICY DECISION / 1.0</span>
+                <strong data-output-decision>ALLOWED</strong>
+              </div>
+              <code class="decision-command" data-output-command>$ pwd</code>
+              <div class="risk-meter" aria-label="Risk classification">
+                <span class="is-lit"></span><span></span><span></span><span></span>
+                <b data-output-risk>LOW RISK</b>
+              </div>
+              <dl class="decision-grid">
+                <div><dt>MODE</dt><dd data-output-mode>inspect</dd></div>
+                <div><dt>NETWORK</dt><dd data-output-network>denied</dd></div>
+                <div><dt>APPROVAL</dt><dd data-output-approval>not required</dd></div>
+                <div><dt>HARD LIMIT</dt><dd>20 sec / 1 MiB</dd></div>
+              </dl>
+              <p class="decision-reason" data-output-reason>
+                Read-only command inside the selected workspace.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section product-section" aria-labelledby="product-title">
+        <div class="section-index">02 / MISSION CONTROL</div>
+        <div class="section-heading product-heading">
+          <p class="kicker">One screen. The whole boundary.</p>
+          <h2 id="product-title">Plan on the left.<br />Proof on the right.</h2>
+          <p>
+            The browser console keeps scope, risk, events, controls, output, and signed evidence
+            in one inspectable surface. It works without a model key and loads no external UI
+            assets.
+          </p>
+        </div>
+
+        <figure class="product-frame reveal">
+          <div class="frame-bar">
+            <span><i></i><i></i><i></i></span>
+            <span>127.0.0.1:8000 / LOCAL ONLY</span>
+            <span>VERIFIED UI</span>
+          </div>
+          <img
+            src="assets/mission-control.jpg"
+            alt="Term MCP DeepSeek mission control showing an inspect-mode pwd plan, execution events, and a signed succeeded receipt"
+            width="1778"
+            height="1111"
+            loading="lazy"
+          />
+          <figcaption>
+            Real v1.0 interface · keyboard tested · responsive · no CDN · no DeepSeek key required
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="section proof-section" id="proof" aria-labelledby="proof-title">
+        <div class="section-index">03 / PROOF</div>
+        <div class="section-heading">
+          <p class="kicker">Final states that do not blur together</p>
+          <h2 id="proof-title">Every action leaves evidence.</h2>
+          <p>
+            Receipts separate status, policy, timing, exit code, signal, stdout, stderr, and
+            signature. Sharing-safe exports remove command text, paths, arguments, and output,
+            then sign the transformed artifact again.
+          </p>
+        </div>
+
+        <div class="receipt-stack">
+          <article class="receipt-card receipt-success">
+            <div class="receipt-card-top"><span>RECEIPT / 001</span><span>14 ms</span></div>
+            <h3>SUCCEEDED</h3>
+            <p>The bounded command reached exit code 0 and the signature validates.</p>
+            <dl><div><dt>EXIT</dt><dd>0</dd></div><div><dt>SIGNAL</dt><dd>—</dd></div></dl>
+            <a href="receipts/succeeded-inspection.json">Inspect JSON <span>↗</span></a>
+          </article>
+          <article class="receipt-card receipt-cancelled">
+            <div class="receipt-card-top"><span>RECEIPT / 002</span><span>480 ms</span></div>
+            <h3>CANCELLED</h3>
+            <p>An approved process was stopped deliberately and recorded with its signal.</p>
+            <dl><div><dt>EXIT</dt><dd>-15</dd></div><div><dt>SIGNAL</dt><dd>15</dd></div></dl>
+            <a href="receipts/cancelled-process.json">Inspect JSON <span>↗</span></a>
+          </article>
+          <article class="receipt-card receipt-timeout">
+            <div class="receipt-card-top"><span>RECEIPT / 003</span><span>2,000 ms</span></div>
+            <h3>TIMED_OUT</h3>
+            <p>The process crossed its approved limit and ended as a distinct timeout state.</p>
+            <dl><div><dt>EXIT</dt><dd>-15</dd></div><div><dt>SIGNAL</dt><dd>15</dd></div></dl>
+            <a href="receipts/timed-out-process.json">Inspect JSON <span>↗</span></a>
+          </article>
+        </div>
+
+        <div class="proof-note">
+          <span class="proof-seal" aria-hidden="true">HMAC<br />SHA-256</span>
+          <p>
+            <strong>A receipt proves what this process recorded.</strong>
+            It does not claim that an inspected repository or command was trustworthy. The
+            distinction is part of the product—not a footnote.
+          </p>
+          <a href="docs.html#receipts">Read the receipt model</a>
+        </div>
+      </section>
+
+      <section class="section recipes-section" id="recipes" aria-labelledby="recipes-title">
+        <div class="section-index">04 / RECIPES</div>
+        <div class="section-heading">
+          <p class="kicker">Useful on an unfamiliar repository</p>
+          <h2 id="recipes-title">Six workflows.<br />Zero machine mutation.</h2>
+          <p>
+            Every public recipe is versioned, inspect-only, network-free, write-free, bounded,
+            and executed by CI through the same production policy as MCP clients.
+          </p>
+        </div>
+
+        <div class="recipe-ledger">
+          <a href="recipes/inspect-repository.json">
+            <span>01</span><strong>Inspect repository</strong><small>Map top-level files and Git state</small><b>JSON ↗</b>
+          </a>
+          <a href="recipes/diagnose-tests.json">
+            <span>02</span><strong>Diagnose tests</strong><small>Find test files and configuration</small><b>JSON ↗</b>
+          </a>
+          <a href="recipes/discover-javascript-tests.json">
+            <span>03</span><strong>Discover JavaScript tests</strong><small>Map test files without installing dependencies</small><b>JSON ↗</b>
+          </a>
+          <a href="recipes/analyze-logs.json">
+            <span>04</span><strong>Analyze logs</strong><small>Inventory local incident evidence</small><b>JSON ↗</b>
+          </a>
+          <a href="recipes/verify-port-config.json">
+            <span>05</span><strong>Verify port config</strong><small>Compare service-port declarations</small><b>JSON ↗</b>
+          </a>
+          <a href="recipes/read-only-boundary.json">
+            <span>06</span><strong>Read-only boundary</strong><small>Prove no write or network permission</small><b>JSON ↗</b>
+          </a>
+        </div>
+      </section>
+
+      <section class="section architecture-section" aria-labelledby="architecture-title">
+        <div class="section-index">05 / ARCHITECTURE</div>
+        <div class="section-heading">
+          <p class="kicker">One engine across human and machine clients</p>
+          <h2 id="architecture-title">The execution path has no shortcut.</h2>
+        </div>
+
+        <ol class="execution-path">
+          <li><span>01</span><strong>Intent</strong><small>Human or MCP client</small></li>
+          <li><span>02</span><strong>Plan</strong><small>Versioned and session-bound</small></li>
+          <li><span>03</span><strong>Policy</strong><small>Workspace, risk, capabilities</small></li>
+          <li><span>04</span><strong>Approval</strong><small>Explicit when required</small></li>
+          <li><span>05</span><strong>Process</strong><small>Argv only, hard limits</small></li>
+          <li><span>06</span><strong>Receipt</strong><small>Signed final evidence</small></li>
+        </ol>
+
+        <div class="architecture-grid">
+          <article>
+            <span>TRANSPORT / A</span>
+            <h3>STDIO</h3>
+            <p>Protocol JSON on stdout, diagnostics on stderr, lifecycle tied to the parent.</p>
+          </article>
+          <article>
+            <span>TRANSPORT / B</span>
+            <h3>HTTP</h3>
+            <p>Bearer authentication, exact origin allowlist, rate and request limits.</p>
+          </article>
+          <article>
+            <span>CONTRACT / 01</span>
+            <h3>MCP 2026-07-28</h3>
+            <p>Primary stateless contract, tested with the official Python SDK.</p>
+          </article>
+          <article>
+            <span>CONTRACT / 02</span>
+            <h3>MCP 2025-11-25</h3>
+            <p>Legacy initialize and transport-session compatibility, explicitly tested.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="install-section" id="install" aria-labelledby="install-title">
+        <div class="install-copy">
+          <span class="section-index">06 / FIRST RESULT</span>
+          <p class="kicker">No model key required</p>
+          <h2 id="install-title">From clone to signed proof in under a minute.</h2>
+          <p>
+            Install the immutable v1.0 tag, point the server at a repository, and open the local
+            mission control. Inspect mode denies network and writes by default.
+          </p>
+          <div class="install-links">
+            <a href="docs.html#quick-start">Open full quick start</a>
+            <a href="https://github.com/OthmaneBlial/term_mcp_deepseek/releases/tag/v1.0.0">Verify release assets ↗</a>
+          </div>
+        </div>
+
+        <div class="code-window">
+          <div class="code-window-bar">
+            <span>QUICK_START.SH</span>
+            <button class="copy-button" type="button" data-copy-target="quick-start-code">
+              <span data-copy-label>Copy</span>
+            </button>
+          </div>
+          <pre id="quick-start-code"><code><span class="code-muted"># Install the verified v1 release</span>
+pipx install <span class="code-string">"git+https://github.com/OthmaneBlial/term_mcp_deepseek.git@v1.0.0"</span>
+
+<span class="code-muted"># Start inside the repository to inspect</span>
+cd /path/to/your/repository
+term-mcp serve</code></pre>
+          <div class="code-result"><i aria-hidden="true"></i> OPEN 127.0.0.1:8000 · BUILD PLAN · EXECUTE</div>
+        </div>
+      </section>
+
+      <section class="final-cta" aria-labelledby="cta-title">
+        <div>
+          <span>LOCAL / EXPLICIT / RECEIPTED</span>
+          <h2 id="cta-title">Let the model suggest.<br />Make the system prove.</h2>
+        </div>
+        <div class="cta-actions">
+          <a class="button button-primary" href="https://github.com/OthmaneBlial/term_mcp_deepseek">View on GitHub ↗</a>
+          <a class="button button-ghost" href="docs.html">Read the docs</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="brand footer-brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>
+        <span><strong>TERM / MCP</strong><small>DEEPSEEK MISSION CONTROL</small></span>
+      </a>
+      <p>MIT licensed · Local-first · No mandatory telemetry</p>
+      <nav aria-label="Footer navigation">
+        <a href="docs.html">Documentation</a>
+        <a href="https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/CONTRIBUTING.md">Contribute</a>
+      </nav>
+    </footer>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

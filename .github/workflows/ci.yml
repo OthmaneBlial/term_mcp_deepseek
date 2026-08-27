@@ -96,6 +96,17 @@ jobs:
       - name: Run bounded no-model benchmark
         run: python -m benchmarks.run_benchmark --iterations 2 --json
 
+  site:
+    name: Portable project site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python scripts/check_site.py
+      - run: node --check site/app.js
+
   docker:
     name: Docker build and health
     runs-on: ubuntu-latest

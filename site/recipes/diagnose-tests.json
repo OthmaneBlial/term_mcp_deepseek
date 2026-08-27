@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "id": "diagnose-tests",
+  "title": "Locate test configuration and test files",
+  "intent": "Find the repository test configuration and test files before choosing any test command to run.",
+  "prerequisites": [
+    "The repository contains pyproject.toml and a tests directory",
+    "grep and find are installed in trusted system paths"
+  ],
+  "permissions": {"mode": "inspect", "network": false, "writes": false},
+  "risk": "low",
+  "limits": {"timeout_seconds": 10, "max_output_bytes": 131072},
+  "steps": [
+    {"name": "Read declared test paths", "command": "grep -n testpaths pyproject.toml", "expected_status": "succeeded"},
+    {"name": "Inventory test files", "command": "find tests -maxdepth 2 -type f", "expected_status": "succeeded"}
+  ],
+  "expected_output": "Receipts identify test configuration and files without executing project code.",
+  "sample_receipt": {
+    "sharing_redacted": true,
+    "status": "succeeded",
+    "risk": "low",
+    "command": "[REDACTED FOR SHARING]",
+    "cwd": "[REDACTED FOR SHARING]",
+    "stdout": "[REDACTED FOR SHARING]",
+    "stderr": "[REDACTED FOR SHARING]"
+  }
+}

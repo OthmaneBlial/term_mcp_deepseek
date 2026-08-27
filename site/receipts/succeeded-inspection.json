@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "id": "10000000-0000-4000-8000-000000000001",
+  "plan_id": "20000000-0000-4000-8000-000000000001",
+  "session_id": "30000000-0000-4000-8000-000000000001",
+  "command": "[REDACTED FOR SHARING]",
+  "command_sha256": "a1159e9df3670d549d04524532629f5477ceb7deec9b45e47e8c009506ecb2c8",
+  "cwd": "[REDACTED FOR SHARING]",
+  "mode": "inspect",
+  "risk": "low",
+  "approved": true,
+  "policy": {
+    "allowed": true,
+    "risk": "low",
+    "requires_approval": false,
+    "reasons": [
+      "Read-only workspace inspection allowed in inspect mode."
+    ],
+    "argv": []
+  },
+  "status": "succeeded",
+  "started_at": "2026-08-27T09:00:00+00:00",
+  "finished_at": "2026-08-27T09:00:00.120000+00:00",
+  "duration_ms": 120,
+  "exit_code": 0,
+  "signal": null,
+  "stdout": "[REDACTED FOR SHARING]",
+  "stderr": "[REDACTED FOR SHARING]",
+  "output_truncated": false,
+  "sharing_redacted": true,
+  "signature": "863b91011bbac7aa8ac3d585b809f8fbd834cd2b6413ed36bfff119daf977116"
+}

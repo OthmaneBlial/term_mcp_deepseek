@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Quick start, security boundary, MCP transports, receipts, recipes, and operations for Term MCP DeepSeek."
+    />
+    <meta name="theme-color" content="#07100d" />
+    <link rel="canonical" href="https://othmaneblial.github.io/term_mcp_deepseek/docs.html" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Documentation — Term MCP DeepSeek</title>
+  </head>
+  <body class="docs-body">
+    <a class="skip-link" href="#docs-main">Skip to documentation</a>
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Term MCP DeepSeek home">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>
+        <span>
+          <strong>TERM / MCP</strong>
+          <small>DEEPSEEK MISSION CONTROL</small>
+        </span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <span>Menu</span>
+        <span class="menu-bars" aria-hidden="true"></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+        <a href="index.html#boundary">Boundary</a>
+        <a href="index.html#proof">Proof</a>
+        <a href="index.html#recipes">Recipes</a>
+        <a href="docs.html" aria-current="page">Docs</a>
+        <a class="nav-github" href="https://github.com/OthmaneBlial/term_mcp_deepseek">
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
+      </nav>
+    </header>
+
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <span>FIELD MANUAL / v1.0</span>
+        <nav aria-label="Documentation sections">
+          <a href="#quick-start">Quick start</a>
+          <a href="#mental-model">Mental model</a>
+          <a href="#modes">Approval modes</a>
+          <a href="#clients">MCP clients</a>
+          <a href="#receipts">Receipts</a>
+          <a href="#recipes">Safe recipes</a>
+          <a href="#operations">Operations</a>
+          <a href="#limits">Limits</a>
+          <a href="#security">Security</a>
+        </nav>
+      </aside>
+
+      <main class="docs-content" id="docs-main">
+        <header class="docs-hero">
+          <span class="section-index">DOCUMENTATION / VERIFIED v1.0</span>
+          <h1>Operate the boundary, not a black box.</h1>
+          <p>
+            This is the shortest path from installation to a bounded local result. It also makes
+            the trust boundary explicit before you widen permissions or connect a model.
+          </p>
+        </header>
+
+        <section class="docs-block" id="quick-start" aria-labelledby="quick-start-title">
+          <span class="section-index">01 / QUICK START</span>
+          <h2 id="quick-start-title">First signed result.</h2>
+          <p>
+            Requirements: macOS or Linux, Python 3.10–3.13, and pipx. A DeepSeek API key is not
+            required for local discovery, planning, execution, receipts, or the guided demos.
+          </p>
+
+          <div class="code-window">
+            <div class="code-window-bar">
+              <span>INSTALL_RELEASE.SH</span>
+              <button class="copy-button" type="button" data-copy-target="release-install-code">
+                <span data-copy-label>Copy</span>
+              </button>
+            </div>
+            <pre id="release-install-code"><code>pipx install "git+https://github.com/OthmaneBlial/term_mcp_deepseek.git@v1.0.0"
+cd /path/to/the/repository/you/want/to/inspect
+term-mcp serve</code></pre>
+            <div class="code-result"><i aria-hidden="true"></i> VERIFIED RELEASE PATH</div>
+          </div>
+
+          <p>
+            The server prints a one-time bearer token. Open <code>http://127.0.0.1:8000</code>,
+            paste the token, select <strong>Inspect workspace</strong>, then build and execute the
+            visible <code>pwd</code> plan. The expected result is a signed <code>succeeded</code>
+            receipt with exit code 0.
+          </p>
+
+          <h3>From a clone</h3>
+          <div class="code-window">
+            <div class="code-window-bar">
+              <span>CONTRIBUTOR_PATH.SH</span>
+              <button class="copy-button" type="button" data-copy-target="clone-install-code">
+                <span data-copy-label>Copy</span>
+              </button>
+            </div>
+            <pre id="clone-install-code"><code>git clone https://github.com/OthmaneBlial/term_mcp_deepseek.git
+cd term_mcp_deepseek
+./startup.sh token
+./startup.sh</code></pre>
+          </div>
+
+          <div class="docs-callout">
+            <strong>Stop cleanly:</strong> press <code>Ctrl+C</code>. The generated token and
+            in-memory sessions disappear with the process.
+          </div>
+
+          <a class="docs-external" href="https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/docs/QUICKSTART.fr.md">
+            Guide de démarrage rapide en français ↗
+          </a>
+        </section>
+
+        <section class="docs-block" id="mental-model" aria-labelledby="mental-model-title">
+          <span class="section-index">02 / MENTAL MODEL</span>
+          <h2 id="mental-model-title">One path. No shortcut.</h2>
+          <p>
+            DeepSeek may suggest text, but model output is never an execution trigger. Human and
+            MCP clients use the same deterministic server, policy engine, execution service, and
+            receipt signer.
+          </p>
+
+          <ol class="docs-list">
+            <li><strong>Intent.</strong> A human or MCP client asks for a concrete local result.</li>
+            <li><strong>Plan.</strong> The server creates a versioned, session-bound execution plan.</li>
+            <li><strong>Policy.</strong> Argv, workspace, paths, network, mode, risk, and limits are resolved.</li>
+            <li><strong>Approval.</strong> A plan-specific state transition is required when policy says so.</li>
+            <li><strong>Process.</strong> Execution uses an argv list, no shell, reduced environment, process group, timeout, and output bounds.</li>
+            <li><strong>Receipt.</strong> Every final state is structured, redacted, and HMAC-signed.</li>
+          </ol>
+
+          <a class="docs-external" href="https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/docs/ARCHITECTURE.md">
+            Full architecture and diagrams ↗
+          </a>
+        </section>
+
+        <section class="docs-block" id="modes" aria-labelledby="modes-title">
+          <span class="section-index">03 / APPROVAL MODES</span>
+          <h2 id="modes-title">Start narrow.</h2>
+          <p>
+            The default is <code>inspect</code> with network denied. A wider mode is a deliberate
+            operator decision, not something a prompt or model can select.
+          </p>
+
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead>
+                <tr><th>Mode</th><th>Intended use</th><th>Writes</th><th>Project code</th><th>Approval</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>inspect</td><td>Repository discovery</td><td>Blocked</td><td>Blocked</td><td>Long processes only</td></tr>
+                <tr><td>confirm</td><td>Deliberate local work</td><td>Policy-scoped</td><td>Allowed by policy</td><td>Required for risky actions</td></tr>
+                <tr><td>trusted</td><td>Pre-approved automation</td><td>Policy-scoped</td><td>Allowed by policy</td><td>Pre-approved, always receipted</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="docs-callout">
+            <strong>Important:</strong> confirm and trusted modes are not an operating-system
+            sandbox. Build tools and test runners can execute repository code. Use a disposable
+            container or VM for hostile or unknown projects.
+          </div>
+        </section>
+
+        <section class="docs-block" id="clients" aria-labelledby="clients-title">
+          <span class="section-index">04 / MCP CLIENTS</span>
+          <h2 id="clients-title">STDIO first. HTTP when needed.</h2>
+          <p>
+            The server targets modern MCP <code>2026-07-28</code> and supports the legacy
+            <code>2025-11-25</code> initialize lifecycle. Both transports share one dispatcher and
+            tool catalog.
+          </p>
+
+          <h3>Recommended local STDIO configuration</h3>
+          <div class="code-window">
+            <div class="code-window-bar">
+              <span>MCP_CONFIG.JSON</span>
+              <button class="copy-button" type="button" data-copy-target="mcp-config-code">
+                <span data-copy-label>Copy</span>
+              </button>
+            </div>
+            <pre id="mcp-config-code"><code>{
+  "mcpServers": {
+    "term-mcp-deepseek": {
+      "command": "/absolute/path/to/term-mcp",
+      "args": ["stdio"],
+      "env": {
+        "WORKSPACE_ROOT": "/absolute/path/to/your/project",
+        "APPROVAL_MODE": "inspect"
+      }
+    }
+  }
+}</code></pre>
+          </div>
+
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Client evidence</th><th>Version</th><th>STDIO</th><th>HTTP</th></tr></thead>
+              <tbody>
+                <tr><td>Official MCP Python SDK</td><td>2.1.1</td><td>Modern + legacy tested</td><td>Modern + legacy tested</td></tr>
+                <tr><td>MCP Inspector CLI</td><td>2.4.0</td><td>tools/list + tools/call tested</td><td>Not tested</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            “Not tested” is preserved as evidence, not converted into a compatibility claim.
+            STDOUT contains protocol JSON only; diagnostics go to STDERR.
+          </p>
+          <a class="docs-external" href="https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/docs/MCP_COMPATIBILITY.md">
+            Dated compatibility matrix and reproduction commands ↗
+          </a>
+        </section>
+
+        <section class="docs-block" id="receipts" aria-labelledby="receipts-title">
+          <span class="section-index">05 / RECEIPTS</span>
+          <h2 id="receipts-title">Readable locally. Safe to redact.</h2>
+          <p>
+            Schema 1.0 records command digest, mode, risk, approval, policy, status, timestamps,
+            duration, exit code, signal, bounded stdout/stderr, truncation, and signature.
+          </p>
+
+          <ul class="docs-list">
+            <li><strong>succeeded</strong> — the bounded process reached exit code 0.</li>
+            <li><strong>failed</strong> — the process completed unsuccessfully without being conflated with cancellation.</li>
+            <li><strong>cancelled</strong> — an operator stopped the process and the termination signal is retained.</li>
+            <li><strong>timed_out</strong> — the approved hard duration was crossed.</li>
+          </ul>
+
+          <p>
+            A share-safe export replaces command, workspace, arguments, stdout, and stderr with
+            redaction markers, adds <code>sharing_redacted: true</code>, then signs the transformed
+            receipt again.
+          </p>
+
+          <div class="install-links">
+            <a href="receipts/succeeded-inspection.json">Succeeded JSON</a>
+            <a href="receipts/cancelled-process.json">Cancelled JSON</a>
+            <a href="receipts/timed-out-process.json">Timed-out JSON</a>
+          </div>
+        </section>
+
+        <section class="docs-block" id="recipes" aria-labelledby="docs-recipes-title">
+          <span class="section-index">06 / SAFE RECIPES</span>
+          <h2 id="docs-recipes-title">Portable inspection workflows.</h2>
+          <p>
+            Public recipes declare intent, prerequisites, permissions, steps, expected output,
+            anonymized receipt preview, and risk. Semantic validation requires inspect mode, no
+            network, no writes, low risk, and production-policy acceptance.
+          </p>
+
+          <div class="code-window">
+            <div class="code-window-bar">
+              <span>RUN_RECIPE.SH</span>
+              <button class="copy-button" type="button" data-copy-target="recipe-code">
+                <span data-copy-label>Copy</span>
+              </button>
+            </div>
+            <pre id="recipe-code"><code>term-mcp recipe validate examples/recipes/*.json --workspace .
+term-mcp recipe run examples/recipes/inspect-repository.json --workspace .</code></pre>
+          </div>
+
+          <div class="recipe-ledger">
+            <a href="recipes/inspect-repository.json"><span>01</span><strong>Inspect repository</strong><small>Repository surface and Git state</small><b>JSON ↗</b></a>
+            <a href="recipes/diagnose-tests.json"><span>02</span><strong>Diagnose tests</strong><small>Test files and configuration</small><b>JSON ↗</b></a>
+            <a href="recipes/discover-javascript-tests.json"><span>03</span><strong>Discover JavaScript tests</strong><small>Dependency-free test discovery</small><b>JSON ↗</b></a>
+            <a href="recipes/analyze-logs.json"><span>04</span><strong>Analyze logs</strong><small>Local incident evidence inventory</small><b>JSON ↗</b></a>
+            <a href="recipes/verify-port-config.json"><span>05</span><strong>Verify port config</strong><small>Service-port declarations</small><b>JSON ↗</b></a>
+            <a href="recipes/read-only-boundary.json"><span>06</span><strong>Read-only boundary</strong><small>Permission-boundary proof</small><b>JSON ↗</b></a>
+          </div>
+        </section>
+
+        <section class="docs-block" id="operations" aria-labelledby="operations-title">
+          <span class="section-index">07 / OPERATIONS</span>
+          <h2 id="operations-title">Fail closed by configuration.</h2>
+          <p>
+            The no-key defaults are sufficient for local inspection. Use <code>term-mcp doctor
+            --json</code> to verify Python, shell, typed configuration, workspace permissions, and
+            STDIO readiness.
+          </p>
+
+          <div class="code-window">
+            <div class="code-window-bar">
+              <span>LOCAL_CHECK.SH</span>
+              <button class="copy-button" type="button" data-copy-target="doctor-code">
+                <span data-copy-label>Copy</span>
+              </button>
+            </div>
+            <pre id="doctor-code"><code>cp .env.example .env
+term-mcp token
+term-mcp doctor --json
+term-mcp demo</code></pre>
+          </div>
+
+          <ul class="docs-list">
+            <li><strong>AUTH_TOKEN</strong> — generated ephemerally when absent; configured values shorter than 32 characters are refused.</li>
+            <li><strong>WORKSPACE_ROOT</strong> — keep it scoped to the smallest directory needed.</li>
+            <li><strong>ALLOW_NETWORK</strong> — false by default; widen only for a specific reviewed workflow.</li>
+            <li><strong>ALLOWED_ORIGINS</strong> — exact origins only; wildcard configuration is refused.</li>
+            <li><strong>DEEPSEEK_API_KEY</strong> — optional and used only by the isolated advisory panel.</li>
+          </ul>
+
+          <a class="docs-external" href="https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/docs/OPERATIONS.md">
+            Deployment, Docker, headers, and rollback ↗
+          </a>
+        </section>
+
+        <section class="docs-block" id="limits" aria-labelledby="limits-title">
+          <span class="section-index">08 / DEFAULT LIMITS</span>
+          <h2 id="limits-title">Bounds are part of the plan.</h2>
+
+          <div class="docs-table-wrap">
+            <table class="docs-table">
+              <thead><tr><th>Limit</th><th>Default</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td>Session inactivity</td><td>3,600 seconds</td><td>Expire abandoned state</td></tr>
+                <tr><td>Concurrent sessions</td><td>10</td><td>Bound memory and process surface</td></tr>
+                <tr><td>Active process per session</td><td>1</td><td>Keep control unambiguous</td></tr>
+                <tr><td>Command duration</td><td>20 seconds</td><td>Terminate runaway work</td></tr>
+                <tr><td>Command length</td><td>1,000 characters</td><td>Bound parsing input</td></tr>
+                <tr><td>Output per stream</td><td>1 MiB</td><td>Bound stdout and stderr</td></tr>
+                <tr><td>HTTP request body</td><td>64 KiB</td><td>Bound transport input</td></tr>
+                <tr><td>HTTP rate</td><td>60/min/address</td><td>Limit local abuse</td></tr>
+                <tr><td>DeepSeek timeout</td><td>20 seconds</td><td>Bound optional advisor latency</td></tr>
+                <tr><td>DeepSeek output</td><td>1,024 tokens</td><td>Bound optional advisor output</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="docs-block" id="security" aria-labelledby="security-title">
+          <span class="section-index">09 / SECURITY</span>
+          <h2 id="security-title">Know what is—and is not—guaranteed.</h2>
+          <p>
+            Inspect mode parses commands without a shell, blocks interpreters and network clients,
+            validates paths against the workspace, rejects symlink escapes, and emits signed,
+            redacted receipts.
+          </p>
+
+          <div class="docs-callout">
+            <strong>No remote multi-tenant guarantee.</strong> The server is designed for localhost
+            and one trusted operator. Do not expose it directly to an untrusted network.
+          </div>
+          <div class="docs-callout">
+            <strong>No hostile-project host sandbox.</strong> Confirm and trusted modes may run
+            project code through allowed build or test tools. Use a disposable OS boundary for
+            untrusted repositories.
+          </div>
+
+          <div class="install-links">
+            <a href="https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/SECURITY.md">Security policy ↗</a>
+            <a href="https://github.com/OthmaneBlial/term_mcp_deepseek/blob/main/docs/THREAT_MODEL.md">Threat model ↗</a>
+            <a href="https://github.com/OthmaneBlial/term_mcp_deepseek/security/advisories/new">Private vulnerability report ↗</a>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="site-footer">
+      <a class="brand footer-brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>
+        <span><strong>TERM / MCP</strong><small>DEEPSEEK MISSION CONTROL</small></span>
+      </a>
+      <p>Field manual v1.0 · Verified 2026-08-27</p>
+      <nav aria-label="Footer navigation">
+        <a href="index.html">Product</a>
+        <a href="https://github.com/OthmaneBlial/term_mcp_deepseek">GitHub</a>
+        <a href="https://github.com/OthmaneBlial/term_mcp_deepseek/releases/tag/v1.0.0">Release</a>
+      </nav>
+    </footer>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

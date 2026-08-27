@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "id": "verify-port-config",
+  "title": "Compare environment and container port declarations",
+  "intent": "Show the configured service port in environment and container files before starting a server.",
+  "prerequisites": [
+    "The workspace contains .env.example and docker-compose.yml",
+    "grep is installed in a trusted system path"
+  ],
+  "permissions": {"mode": "inspect", "network": false, "writes": false},
+  "risk": "low",
+  "limits": {"timeout_seconds": 10, "max_output_bytes": 65536},
+  "steps": [
+    {"name": "Read environment port", "command": "grep -n PORT .env.example", "expected_status": "succeeded"},
+    {"name": "Read container port", "command": "grep -n 8000 docker-compose.yml", "expected_status": "succeeded"}
+  ],
+  "expected_output": "Receipts expose both port declarations so configuration drift is visible.",
+  "sample_receipt": {
+    "sharing_redacted": true,
+    "status": "succeeded",
+    "risk": "low",
+    "command": "[REDACTED FOR SHARING]",
+    "cwd": "[REDACTED FOR SHARING]",
+    "stdout": "[REDACTED FOR SHARING]",
+    "stderr": "[REDACTED FOR SHARING]"
+  }
+}
