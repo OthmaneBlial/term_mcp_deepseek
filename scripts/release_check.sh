@@ -5,6 +5,16 @@ RELEASE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RELEASE_PYTHON="${PYTHON_BIN:-python3}"
 RELEASE_OUTPUT="${1:-$RELEASE_ROOT/dist}"
 
+case "$RELEASE_PYTHON" in
+  /*) ;;
+  */*)
+    RELEASE_PYTHON="$(cd "$(dirname "$RELEASE_PYTHON")" && pwd)/$(basename "$RELEASE_PYTHON")"
+    ;;
+  *)
+    RELEASE_PYTHON="$(command -v "$RELEASE_PYTHON")"
+    ;;
+esac
+
 if [[ -n "$(git -C "$RELEASE_ROOT" status --porcelain)" ]]; then
   echo "release check requires a clean worktree" >&2
   exit 2
