@@ -14,5 +14,7 @@ services:
       LOG_LEVEL: "INFO"
       WORKSPACE_ROOT: "/workspace"
     volumes:
-      - ./:/workspace
+      - ./:/workspace:ro
+    init: true
+    stop_grace_period: 10s
     restart: unless-stopped

@@ -1,34 +1,42 @@
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
+ARG PYTHON_IMAGE=python:3.12.11-slim-bookworm@sha256:519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
-ENV HOST=0.0.0.0
-ENV PORT=8000
+FROM ${PYTHON_IMAGE} AS wheel-builder
 
-WORKDIR /app
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_ROOT_USER_ACTION=ignore \
+    PYTHONDONTWRITEBYTECODE=1
 
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY . .
+RUN python -m pip wheel --constraint constraints.txt --wheel-dir /wheels .
 
-COPY pyproject.toml README.md LICENSE ./
-COPY api ./api
-COPY models ./models
-COPY tools ./tools
-COPY term_mcp_deepseek ./term_mcp_deepseek
-COPY config.py mcp_server.py server.py stdio_server.py ./
-RUN python -m pip install --no-cache-dir .
+FROM ${PYTHON_IMAGE} AS runtime
 
-COPY static ./static
+ENV HOST=0.0.0.0 \
+    PIP_ROOT_USER_ACTION=ignore \
+    PORT=8000 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    WORKSPACE_ROOT=/workspace
 
-RUN useradd --create-home --shell /bin/bash appuser \
-    && chown -R appuser:appuser /app
-USER appuser
+RUN groupadd --gid 10001 termmcp \
+    && useradd --uid 10001 --gid termmcp --create-home --shell /usr/sbin/nologin termmcp \
+    && mkdir --parents /workspace \
+    && chown termmcp:termmcp /workspace
+
+COPY --from=wheel-builder /wheels /wheels
+RUN python -m pip install --no-index --find-links=/wheels term-mcp-deepseek \
+    && rm -rf /wheels
+
+USER 10001:10001
+WORKDIR /workspace
 
 EXPOSE 8000
+STOPSIGNAL SIGTERM
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl --fail http://127.0.0.1:8000/health || exit 1
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
 
-CMD ["python", "-m", "term_mcp_deepseek", "serve", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["term-mcp", "serve", "--host", "0.0.0.0", "--port", "8000"]

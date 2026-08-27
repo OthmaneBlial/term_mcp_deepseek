@@ -27,6 +27,9 @@ TOOL_ARGUMENTS = {
     "terminal_plan": ({"command"}, {"session_id", "cwd"}),
     "terminal_approve": ({"session_id", "plan_id"}, set()),
     "terminal_execute": ({"session_id", "plan_id"}, set()),
+    "terminal_retry": ({"session_id", "plan_id"}, set()),
+    "terminal_pause": ({"session_id"}, set()),
+    "terminal_resume": ({"session_id"}, set()),
     "terminal_cancel": ({"session_id"}, set()),
     "terminal_receipt": ({"session_id"}, set()),
 }
@@ -57,6 +60,10 @@ class MCPServer:
             api_key=settings.deepseek_api_key,
             base_url=settings.deepseek_base_url,
             model=settings.deepseek_model,
+            timeout=settings.deepseek_timeout,
+            max_retries=settings.deepseek_max_retries,
+            backoff=settings.deepseek_backoff,
+            max_tokens=settings.deepseek_max_tokens,
         )
         self._conversations: dict[str, list[dict[str, str]]] = {}
         self._conversation_lock = threading.Lock()
@@ -205,6 +212,51 @@ class MCPServer:
                     "annotations": {"readOnlyHint": False, "destructiveHint": True},
                 },
                 {
+                    "name": "terminal_retry",
+                    "title": "Create a controlled retry plan",
+                    "description": (
+                        "Create a fresh non-executing plan from an earlier command. "
+                        "The new plan must pass policy and approval again."
+                    ),
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "session_id": {"type": "string"},
+                            "plan_id": {"type": "string"},
+                        },
+                        "required": ["session_id", "plan_id"],
+                        "additionalProperties": False,
+                    },
+                    "outputSchema": {"type": "object"},
+                    "annotations": {"readOnlyHint": True, "destructiveHint": False},
+                },
+                {
+                    "name": "terminal_pause",
+                    "title": "Pause the active command",
+                    "description": "Pause the active process group for one execution session.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {"session_id": {"type": "string"}},
+                        "required": ["session_id"],
+                        "additionalProperties": False,
+                    },
+                    "outputSchema": {"type": "object"},
+                    "annotations": {"readOnlyHint": False, "destructiveHint": False},
+                },
+                {
+                    "name": "terminal_resume",
+                    "title": "Resume the paused command",
+                    "description": "Resume a paused process group for one execution session.",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {"session_id": {"type": "string"}},
+                        "required": ["session_id"],
+                        "additionalProperties": False,
+                    },
+                    "outputSchema": {"type": "object"},
+                    "annotations": {"readOnlyHint": False, "destructiveHint": False},
+                },
+                {
                     "name": "terminal_cancel",
                     "title": "Cancel the active command",
                     "description": "Cancel the active command for one session.",
@@ -269,6 +321,15 @@ class MCPServer:
                 return self._tool_result(
                     receipt.to_dict(),
                     is_error=receipt.status.value != "succeeded",
+                )
+            if name == "terminal_retry":
+                plan = self.execution.replan(arguments["session_id"], arguments["plan_id"])
+                return self._tool_result(plan.to_dict())
+            if name == "terminal_pause":
+                return self._tool_result({"paused": self.execution.pause(arguments["session_id"])})
+            if name == "terminal_resume":
+                return self._tool_result(
+                    {"resumed": self.execution.resume(arguments["session_id"])}
                 )
             if name == "terminal_cancel":
                 return self._tool_result(
@@ -450,8 +511,22 @@ class MCPServer:
             "supported_protocol_versions": list(SUPPORTED_PROTOCOL_VERSIONS),
             "approval_mode": self.settings.approval_mode,
             "workspace": str(Path(self.settings.workspace_root)),
+            "network_allowed": self.settings.allow_network,
+            "limits": {
+                "session_timeout_seconds": self.settings.session_timeout,
+                "command_timeout_seconds": self.settings.command_timeout,
+                "max_output_bytes": self.settings.max_output_bytes,
+            },
             "transports": ["http", "stdio"],
             "authentication": {"http": "bearer", "stdio": "process-local"},
+            "model": {
+                "provider": "deepseek",
+                "model": self.settings.deepseek_model,
+                "available": self.deepseek.available,
+                "timeout_seconds": self.settings.deepseek_timeout,
+                "max_retries": self.settings.deepseek_max_retries,
+                "max_tokens": self.settings.deepseek_max_tokens,
+            },
         }
 
     @staticmethod

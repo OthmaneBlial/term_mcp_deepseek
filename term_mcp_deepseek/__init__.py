@@ -1,10 +1,5 @@
 """Term MCP DeepSeek package."""
 
-from importlib.metadata import PackageNotFoundError, version
-
-try:
-    __version__ = version("term-mcp-deepseek")
-except PackageNotFoundError:
-    __version__ = "0.9.0"
+from term_mcp_deepseek._version import VERSION as __version__
 
 __all__ = ["__version__"]

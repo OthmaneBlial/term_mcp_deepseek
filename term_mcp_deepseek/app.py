@@ -57,7 +57,7 @@ def create_app(
     if validation_errors:
         raise ValueError("; ".join(validation_errors))
 
-    app = Flask(__name__, static_folder="../static", static_url_path="/static")
+    app = Flask(__name__, static_folder="static", static_url_path="/static")
     app.config.update(selected.as_flask_config())
     app.config["SECRET_KEY"] = hashlib.sha256(selected.auth_token.encode("utf-8")).hexdigest()
     if overrides:
