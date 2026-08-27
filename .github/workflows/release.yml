@@ -3,6 +3,12 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to verify or resume
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -12,10 +18,13 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -23,7 +32,7 @@ jobs:
       - name: Validate tag and install release tools
         run: |
           PACKAGE_VERSION="$(python -c 'from term_mcp_deepseek._version import VERSION; print(VERSION)')"
-          test "$GITHUB_REF_NAME" = "v$PACKAGE_VERSION"
+          test "$RELEASE_TAG" = "v$PACKAGE_VERSION"
           python -m pip install --editable ".[dev]"
       - name: Run exact-tag release check
         run: ./scripts/release_check.sh "$RUNNER_TEMP/release-dist"
@@ -32,15 +41,41 @@ jobs:
           subject-path: ${{ runner.temp }}/release-dist/*
       - uses: actions/upload-artifact@v7
         with:
-          name: release-${{ github.ref_name }}
+          name: release-${{ env.RELEASE_TAG }}
           path: ${{ runner.temp }}/release-dist/*
           if-no-files-found: error
-      - name: Create immutable GitHub release
+      - name: Publish or resume the verified GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/release-dist/* \
+          STATE_FILE="$RUNNER_TEMP/release-state.json"
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --json isDraft,assets >"$STATE_FILE" 2>/dev/null; then
+            if jq -e '.isDraft == false' "$STATE_FILE" >/dev/null; then
+              for asset in SHA256SUMS \
+                "term_mcp_deepseek-${RELEASE_TAG#v}-py3-none-any.whl" \
+                "term_mcp_deepseek-${RELEASE_TAG#v}.tar.gz"; do
+                jq -e --arg asset "$asset" \
+                  '.assets | any(.name == $asset)' "$STATE_FILE" >/dev/null
+              done
+              echo "release $RELEASE_TAG is already public and complete"
+              exit 0
+            fi
+          else
+            timeout 120s gh release create "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Term MCP DeepSeek $RELEASE_TAG" \
+              --generate-notes \
+              --verify-tag \
+              --draft
+          fi
+
+          for artifact in "$RUNNER_TEMP"/release-dist/*; do
+            timeout 120s gh release upload "$RELEASE_TAG" "$artifact" \
+              --repo "$GITHUB_REPOSITORY" \
+              --clobber
+          done
+          timeout 120s gh release edit "$RELEASE_TAG" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Term MCP DeepSeek $GITHUB_REF_NAME" \
-            --generate-notes \
-            --verify-tag
+            --draft=false \
+            --latest

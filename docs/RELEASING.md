@@ -29,7 +29,7 @@ git tag -s "v${VERSION}" -m "term-mcp-deepseek ${VERSION}"
 git push origin "v${VERSION}"
 ```
 
-The release workflow fails if tag, package, and CLI versions differ. It rebuilds from the tag, validates artifacts with Twine, installs the wheel in a clean environment, generates checksums and provenance, and creates the GitHub release.
+The release workflow fails if tag, package, and CLI versions differ. It rebuilds from the tag, validates artifacts with Twine, installs the wheel in a clean environment, generates checksums and provenance, and creates the GitHub release. Uploads are bounded and file-by-file; a failed draft can be resumed with the manual workflow input for the same tag. Rerunning a complete public release verifies its required assets without replacing them.
 
 Publishing to PyPI is intentionally separate and requires a protected trusted-publisher environment. A GitHub release or local dry-run is not evidence of a PyPI publication.
 

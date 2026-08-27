@@ -213,18 +213,18 @@ Chaque requête suit ce flux :
 
 ### Travail
 
-- [ ] Ajouter un "pyproject.toml", un package installable, une version unique et un point d’entrée CLI.
-- [ ] Fournir un chemin recommandé parmi "pipx", "uvx" ou installation locale ; ne pas proposer cinq chemins équivalents dans le README.
-- [ ] Fournir un ".env.example" minimal, sans secrets plausibles, avec validation de chaque variable et exemples de configuration locale.
-- [ ] Rendre le conteneur reproductible : dépendances de build séparées, pas d’installation au runtime, utilisateur non-root, port cohérent, health check cohérent et arrêt propre.
-- [ ] Tester Python et les OS réellement supportés dans une matrice CI ; ne pas annoncer Python 3.8+ si le code et les dépendances ne sont pas vérifiés sur cette plage.
-- [ ] Ajouter une commande "doctor" qui vérifie Python, shell, permissions workspace, configuration, connectivité optionnelle et transport.
-- [ ] Réécrire le README autour d’un « résultat en 60 secondes » : installation, configuration, premier appel, sortie attendue, arrêt et dépannage.
-- [ ] Ajouter une courte vidéo/GIF ou une capture terminale reproductible montrant le plan, l’approbation et la receipt.
-- [ ] Ajouter une architecture simple, un tableau des endpoints, un guide sécurité et un tableau des fonctionnalités supportées.
-- [ ] Ajouter "CHANGELOG.md", releases GitHub, versioning cohérent, artefacts publiés et rollback documenté.
-- [ ] Ajouter "SECURITY.md", politique de divulgation, licence visible, "CONTRIBUTING.md", Code of Conduct et templates d’issues.
-- [ ] Ajouter CodeQL ou équivalent, scan de dépendances, secret scanning et vérification des images Docker si une image est publiée.
+- [x] Ajouter un "pyproject.toml", un package installable, une version unique et un point d’entrée CLI.
+- [x] Fournir un chemin recommandé parmi "pipx", "uvx" ou installation locale ; ne pas proposer cinq chemins équivalents dans le README.
+- [x] Fournir un ".env.example" minimal, sans secrets plausibles, avec validation de chaque variable et exemples de configuration locale.
+- [x] Rendre le conteneur reproductible : dépendances de build séparées, pas d’installation au runtime, utilisateur non-root, port cohérent, health check cohérent et arrêt propre.
+- [x] Tester Python et les OS réellement supportés dans une matrice CI ; ne pas annoncer Python 3.8+ si le code et les dépendances ne sont pas vérifiés sur cette plage.
+- [x] Ajouter une commande "doctor" qui vérifie Python, shell, permissions workspace, configuration, connectivité optionnelle et transport.
+- [x] Réécrire le README autour d’un « résultat en 60 secondes » : installation, configuration, premier appel, sortie attendue, arrêt et dépannage.
+- [x] Ajouter une courte vidéo/GIF ou une capture terminale reproductible montrant le plan, l’approbation et la receipt.
+- [x] Ajouter une architecture simple, un tableau des endpoints, un guide sécurité et un tableau des fonctionnalités supportées.
+- [x] Ajouter "CHANGELOG.md", releases GitHub, versioning cohérent, artefacts publiés et rollback documenté.
+- [x] Ajouter "SECURITY.md", politique de divulgation, licence visible, "CONTRIBUTING.md", Code of Conduct et templates d’issues.
+- [x] Ajouter CodeQL ou équivalent, scan de dépendances, secret scanning et vérification des images Docker si une image est publiée.
 
 ### Critères d’acceptation
 
@@ -232,6 +232,8 @@ Chaque requête suit ce flux :
 - Une installation propre, Docker et STDIO sont testés dans CI ou dans une recette de release.
 - Chaque release publie une version qui correspond à la CLI, à l’API d’information et aux notes de version.
 - Le README répond directement à : « que fait-il ? », « pourquoi lui ? », « est-ce sûr ? », « comment l’essayer ? » et « comment contribuer ? ».
+
+**Validation du jalon (2026-08-27) :** 84 tests passent avec 85,04 % de couverture sur la matrice Ubuntu/macOS et Python 3.10–3.13. Le build de wheel/sdist propre, Docker non-root, health/UI/schema, CodeQL, audit Python et scans Trivy dépôt/image sont verts. La release publique `v0.10.0` fournit wheel, sdist, checksums et attestations vérifiés ; son wheel téléchargé a été réinstallé dans un environnement vierge puis validé avec `version`, `doctor`, la démo sans clé et Waitress.
 
 ## P5 — Contribution et boucle communautaire
 
