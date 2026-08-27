@@ -35,7 +35,7 @@ intent → versioned plan → policy decision → human approval → bounded pro
 Requirements: macOS or Linux, Python 3.10–3.13, and [pipx](https://pipx.pypa.io/).
 
 ```bash
-pipx install "git+https://github.com/OthmaneBlial/term_mcp_deepseek.git@v0.10.0"
+pipx install "git+https://github.com/OthmaneBlial/term_mcp_deepseek.git@v1.0.0"
 cd /path/to/the/repository/you/want/to/inspect
 term-mcp serve
 ```

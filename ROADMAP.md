@@ -310,16 +310,18 @@ Ces cibles servent à décider si une phase est terminée ; elles ne sont pas de
 
 Le projet peut être présenté comme une v1 remarquable lorsque toutes ces cases sont vraies :
 
-- [ ] le nom, la promesse et la capture d’écran racontent la même chose ;
-- [ ] le clone, Docker, HTTP et STDIO ont un chemin officiel et vérifié ;
-- [ ] aucune commande générée par le modèle n’est exécutée sans passer par le moteur de permissions ;
-- [ ] le workspace, l’authentification, les sessions et le SSE sont isolés et testés ;
-- [ ] le serveur parle un contrat MCP documenté et dispose de tests de conformité ;
-- [ ] le premier parcours montre une valeur concrète avant de demander une configuration complexe ;
-- [ ] chaque action produit une receipt lisible et partageable après retrait des données sensibles ;
-- [ ] le README contient une démo, des limites honnêtes, un guide sécurité et un dépannage ;
-- [ ] les releases, scans et tests sont automatisés ;
-- [ ] un inconnu peut contribuer par un exemple ou un test sans rendez-vous avec l’auteur.
+- [x] le nom, la promesse et la capture d’écran racontent la même chose ;
+- [x] le clone, Docker, HTTP et STDIO ont un chemin officiel et vérifié ;
+- [x] aucune commande générée par le modèle n’est exécutée sans passer par le moteur de permissions ;
+- [x] le workspace, l’authentification, les sessions et le SSE sont isolés et testés ;
+- [x] le serveur parle un contrat MCP documenté et dispose de tests de conformité ;
+- [x] le premier parcours montre une valeur concrète avant de demander une configuration complexe ;
+- [x] chaque action produit une receipt lisible et partageable après retrait des données sensibles ;
+- [x] le README contient une démo, des limites honnêtes, un guide sécurité et un dépannage ;
+- [x] les releases, scans et tests sont automatisés ;
+- [x] un inconnu peut contribuer par un exemple ou un test sans rendez-vous avec l’auteur.
+
+**Audit v1.0 (2026-08-27) :** chaque case renvoie à une preuve exécutable ou visible produite dans P0–P6 : runtime unique, policy déterministe, tests adversariaux, transports MCP vérifiés, UI testée au clavier et en responsive, receipts signées, installation propre, Docker non-root, CI multi-OS, scans, release reproductible, recettes et parcours de contribution. Les limites non prouvées restent explicitement marquées « Not tested » dans la matrice d’intégration.
 
 ## Décision stratégique finale
 
