@@ -241,17 +241,17 @@ Chaque requête suit ce flux :
 
 ### Travail
 
-- [ ] Ajouter un guide de développement avec environnement, commandes de test, fixtures, conventions et architecture.
-- [ ] Ajouter un devcontainer ou une procédure reproductible pour éviter le « works on my machine ».
-- [ ] Créer des exemples indépendants et petits : inspection de dépôt, diagnostic de tests, analyse de logs, vérification de port, mode lecture seule.
-- [ ] Définir un format de recette : intention, prérequis, permissions, étapes, sortie attendue, receipt anonymisée et niveau de risque.
-- [ ] Publier un dossier "examples/" validé en CI ; chaque recette doit être sans secret et ne pas modifier la machine de façon destructive.
-- [ ] Créer des labels et issues « good first issue », « help wanted », « security », « protocol », « docs » et « client integration ».
-- [ ] Ajouter des tests de régression à partir des bugs corrigés, avec un modèle d’issue qui demande transport, OS, version et receipt.
-- [ ] Documenter la manière d’ajouter un outil sans contourner la sandbox ni le système de permissions.
-- [ ] Ajouter un benchmark reproductible : latence, temps avant premier événement, coût modèle optionnel, taille de sortie et taux d’annulation.
-- [ ] Organiser des mini-défis publics autour des receipts et de la sécurité, pas autour de commandes dangereuses.
-- [ ] Répondre aux issues avec des reproductions minimales et publier les décisions d’architecture importantes.
+- [x] Ajouter un guide de développement avec environnement, commandes de test, fixtures, conventions et architecture.
+- [x] Ajouter un devcontainer ou une procédure reproductible pour éviter le « works on my machine ».
+- [x] Créer des exemples indépendants et petits : inspection de dépôt, diagnostic de tests, analyse de logs, vérification de port, mode lecture seule.
+- [x] Définir un format de recette : intention, prérequis, permissions, étapes, sortie attendue, receipt anonymisée et niveau de risque.
+- [x] Publier un dossier "examples/" validé en CI ; chaque recette doit être sans secret et ne pas modifier la machine de façon destructive.
+- [x] Créer des labels et issues « good first issue », « help wanted », « security », « protocol », « docs » et « client integration ».
+- [x] Ajouter des tests de régression à partir des bugs corrigés, avec un modèle d’issue qui demande transport, OS, version et receipt.
+- [x] Documenter la manière d’ajouter un outil sans contourner la sandbox ni le système de permissions.
+- [x] Ajouter un benchmark reproductible : latence, temps avant premier événement, coût modèle optionnel, taille de sortie et taux d’annulation.
+- [x] Organiser des mini-défis publics autour des receipts et de la sécurité, pas autour de commandes dangereuses.
+- [x] Répondre aux issues avec des reproductions minimales et publier les décisions d’architecture importantes.
 
 ### Critères d’acceptation
 
@@ -259,6 +259,8 @@ Chaque requête suit ce flux :
 - Les exemples sont exécutables sur une machine temporaire et leurs permissions sont lisibles avant lancement.
 - Les bugs critiques deviennent des tests de non-régression.
 - Les PRs reçoivent automatiquement test, lint, sécurité et aperçu de compatibilité protocole.
+
+**Validation du jalon (2026-08-27) :** les cinq recettes inspect-only sont validées puis réellement exécutées en CI sur un hôte temporaire, sans réseau ni écriture, et le benchmark local vérifie notamment un taux d’annulation de 100 %. Les 88 tests passent sur Ubuntu/macOS et Python 3.10–3.13 ; les labels communautaires, six issues de départ, le devcontainer épinglé, les guides contributeur/outils, trois ADR et les mini-défis publics sont en place.
 
 ## P6 — Amplification responsable
 
