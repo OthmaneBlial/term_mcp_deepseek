@@ -268,13 +268,15 @@ Chaque requête suit ce flux :
 
 ### Travail
 
-- [ ] Publier une galerie de receipts anonymisées et de recettes utiles, avec commande de reproduction et limites affichées.
-- [ ] Maintenir une matrice d’intégrations vérifiées avec liens vers les configurations et versions testées.
-- [ ] Produire des démos courtes centrées sur un problème concret : comprendre un dépôt inconnu, diagnostiquer un test, inspecter un incident sans quitter le terminal.
-- [ ] Ajouter des badges qui mesurent des faits : CI, couverture, sécurité, package, version et compatibilité — jamais des badges décoratifs non vérifiés.
-- [ ] Mettre en avant les contributeurs et les recettes acceptées dans les releases.
-- [ ] Mesurer l’adoption sans télémétrie obligatoire : succès de l’installation en CI, issues de démarrage, téléchargements de release si disponibles, contributeurs actifs et réutilisation des exemples.
-- [ ] Suivre la conversion GitHub comme un signal secondaire : visite → clone → premier résultat → retour → contribution. Les étoiles seules ne sont pas la définition du succès.
+- [x] Publier une galerie de receipts anonymisées et de recettes utiles, avec commande de reproduction et limites affichées.
+- [x] Maintenir une matrice d’intégrations vérifiées avec liens vers les configurations et versions testées.
+- [x] Produire des démos courtes centrées sur un problème concret : comprendre un dépôt inconnu, diagnostiquer un test, inspecter un incident sans quitter le terminal.
+- [x] Ajouter des badges qui mesurent des faits : CI, couverture, sécurité, package, version et compatibilité — jamais des badges décoratifs non vérifiés.
+- [x] Mettre en avant les contributeurs et les recettes acceptées dans les releases.
+- [x] Mesurer l’adoption sans télémétrie obligatoire : succès de l’installation en CI, issues de démarrage, téléchargements de release si disponibles, contributeurs actifs et réutilisation des exemples.
+- [x] Suivre la conversion GitHub comme un signal secondaire : visite → clone → premier résultat → retour → contribution. Les étoiles seules ne sont pas la définition du succès.
+
+**Validation du jalon (2026-08-27) :** trois receipts partageables (`succeeded`, `cancelled`, `timed_out`) sont vérifiées par schéma, signature et tests de confidentialité ; la galerie relie les cinq recettes et trois démos concrètes à leurs commandes et limites. Les 94 tests passent avec 84,89 % de couverture, dont le badge est contrôlé par CI. La matrice MCP pointe vers ses preuves, les releases catégorisent et créditent recettes/contributeurs, et le snapshot d’adoption lit uniquement des faits GitHub publics en distinguant zéro d’une source indisponible, sans télémétrie produit.
 
 ## Les 10 premiers tickets à créer
 

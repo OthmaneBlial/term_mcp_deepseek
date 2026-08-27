@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "id": "10000000-0000-4000-8000-000000000002",
+  "plan_id": "20000000-0000-4000-8000-000000000002",
+  "session_id": "30000000-0000-4000-8000-000000000002",
+  "command": "[REDACTED FOR SHARING]",
+  "command_sha256": "6fdeb4af4bc5658e4b853f38cdc719f664d75298a65fc1ece35dd6b3f8c45703",
+  "cwd": "[REDACTED FOR SHARING]",
+  "mode": "confirm",
+  "risk": "medium",
+  "approved": true,
+  "policy": {
+    "allowed": true,
+    "risk": "medium",
+    "requires_approval": true,
+    "reasons": [
+      "Long-running process required explicit approval."
+    ],
+    "argv": []
+  },
+  "status": "cancelled",
+  "started_at": "2026-08-27T09:01:00+00:00",
+  "finished_at": "2026-08-27T09:01:00.480000+00:00",
+  "duration_ms": 480,
+  "exit_code": -15,
+  "signal": 15,
+  "stdout": "[REDACTED FOR SHARING]",
+  "stderr": "[REDACTED FOR SHARING]",
+  "output_truncated": false,
+  "sharing_redacted": true,
+  "signature": "56dfea4a0114ca09d19f4bd19ab8429999152255842e71b649b320dad19812b9"
+}

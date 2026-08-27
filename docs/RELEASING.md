@@ -19,7 +19,9 @@ Use semantic versioning:
 5. Test the generated wheel, not the current editable checkout.
 6. Build and health-check the Docker image.
 7. Confirm the MCP compatibility document has current dates and versions.
-8. Commit and push `main`; wait for CI and security workflows to pass.
+8. Confirm accepted recipes have the `recipe` label and every human contributor is credited.
+9. Run `python3 scripts/adoption_snapshot.py OthmaneBlial/term_mcp_deepseek` and record only factual changes worth mentioning.
+10. Commit and push `main`; wait for CI and security workflows to pass.
 
 ## Tag and publish
 
@@ -30,6 +32,8 @@ git push origin "v${VERSION}"
 ```
 
 The release workflow fails if tag, package, and CLI versions differ. It rebuilds from the tag, validates artifacts with Twine, installs the wheel in a clean environment, generates checksums and provenance, and creates the GitHub release. Uploads are bounded and file-by-file; a failed draft can be resumed with the manual workflow input for the same tag. Rerunning a complete public release verifies its required assets without replacing them.
+
+GitHub generated notes are grouped by security, protocol/client, recipe, and documentation labels. They include merged pull-request authors automatically. Before publishing, add an explicit thank-you for contributors whose work arrived outside a pull request and name newly accepted recipes; do not imply authorship from issue participation alone.
 
 Publishing to PyPI is intentionally separate and requires a protected trusted-publisher environment. A GitHub release or local dry-run is not evidence of a PyPI publication.
 

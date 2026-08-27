@@ -24,6 +24,8 @@ The runner uses the normal plan → policy → execute → signed receipt engine
 
 To contribute, copy [recipe-template.json](recipe-template.json), keep the new file in `examples/recipes/`, add a focused test when behavior changes, and run `./local_ci.sh`. CI validates and executes every recipe.
 
+The [proof gallery](../docs/GALLERY.md) pairs these recipes with complete sharing-redacted `succeeded`, `cancelled`, and `timed_out` receipt fixtures. The fixture signing key is public and test-only.
+
 | Recipe | Concrete question |
 | --- | --- |
 | `inspect-repository` | What state and tracked surface does this repository have? |

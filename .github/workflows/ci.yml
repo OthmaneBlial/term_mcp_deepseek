@@ -45,6 +45,19 @@ jobs:
       - run: python -m pip install --editable ".[test]"
       - run: python -m pytest
 
+  coverage:
+    name: Verified coverage badge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --editable ".[test]"
+      - run: python -m pytest --cov-report=json:coverage.json
+      - run: python scripts/check_coverage_badge.py coverage.json .github/badges/coverage.json
+
   package:
     name: Clean wheel and source archive
     runs-on: ubuntu-latest

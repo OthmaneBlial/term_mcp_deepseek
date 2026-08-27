@@ -73,14 +73,16 @@ Compatibility responses include `Deprecation`, `Sunset`, and documentation `Link
 
 Verified on 2026-08-27 from the repository checkout, without a DeepSeek API key:
 
-| Client | Version | STDIO modern | STDIO legacy | HTTP modern | HTTP legacy |
-| --- | --- | --- | --- | --- | --- |
-| Official MCP Python SDK | `2.1.1` | Tested | Tested | Tested | Tested |
-| MCP Inspector CLI | `2.4.0` | Tested (`tools/list`, `tools/call`) | Negotiated by client | Not tested | Not tested |
-| Claude Desktop / Claude Code | Not pinned | Not tested | Not tested | Not tested | Not tested |
-| Codex | Not pinned | Not tested | Not tested | Not tested | Not tested |
+| Client | Version | STDIO modern | STDIO legacy | HTTP modern | HTTP legacy | Executable evidence / configuration |
+| --- | --- | --- | --- | --- | --- | --- |
+| Official MCP Python SDK | `2.1.1` | Tested | Tested | Tested | Tested | [SDK integration suite](../tests/test_official_mcp_client.py), [pinned test dependency](../pyproject.toml) |
+| MCP Inspector CLI | `2.4.0` | Tested (`tools/list`, `tools/call`) | Negotiated by client | Not tested | Not tested | [Pinned release commands](#mcp-inspector-reproduction) |
+| Claude Desktop / Claude Code | Not pinned | Not tested | Not tested | Not tested | Not tested | [Generic STDIO configuration](../README.md#mcp-clients); client-specific verification is [open](https://github.com/OthmaneBlial/term_mcp_deepseek/issues/12) |
+| Codex | Not pinned | Not tested | Not tested | Not tested | Not tested | [Generic STDIO configuration](../README.md#mcp-clients); client-specific verification is [open](https://github.com/OthmaneBlial/term_mcp_deepseek/issues/12) |
 
 “Not tested” is intentional evidence, not a compatibility claim. The executable Python SDK checks run in the normal test suite; the Inspector commands are documented below for manual release verification.
+
+### MCP Inspector reproduction
 
 ```bash
 WORKSPACE_ROOT="$PWD" npx -y @modelcontextprotocol/inspector@2.4.0 \

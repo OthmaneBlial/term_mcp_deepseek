@@ -1,0 +1,38 @@
+name: Share an example reuse
+description: Show how a public recipe helped on another repository without sharing private data
+title: "example reuse: "
+labels: ["recipe", "example reuse"]
+body:
+  - type: dropdown
+    id: recipe
+    attributes:
+      label: Recipe
+      options: [inspect-repository, diagnose-tests, analyze-logs, verify-port-config, read-only-boundary, community recipe]
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Public or anonymized context
+      description: What question did the recipe help answer?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome and limitation
+      description: What worked, and what still required manual review?
+    validations:
+      required: true
+  - type: textarea
+    id: receipt
+    attributes:
+      label: Optional sharing-redacted receipt
+      render: json
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Sharing check
+      options:
+        - label: This report is opt-in and contains no secrets, private output, or personal data.
+          required: true

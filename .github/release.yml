@@ -1,0 +1,17 @@
+changelog:
+  exclude:
+    labels:
+      - dependencies
+    authors:
+      - dependabot
+  categories:
+    - title: Security and trust boundary
+      labels: [security]
+    - title: MCP clients and protocol
+      labels: [protocol, "client integration"]
+    - title: Community recipes
+      labels: [recipe]
+    - title: Documentation
+      labels: [docs]
+    - title: Other changes
+      labels: ["*"]

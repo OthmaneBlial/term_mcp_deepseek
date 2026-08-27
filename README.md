@@ -1,7 +1,12 @@
 # Term MCP DeepSeek
 
 [![CI](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/ci.yml/badge.svg)](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FOthmaneBlial%2Fterm_mcp_deepseek%2Fmain%2F.github%2Fbadges%2Fcoverage.json)](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/ci.yml)
+[![Security](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/security.yml/badge.svg)](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/security.yml)
 [![CodeQL](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/codeql.yml/badge.svg)](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/codeql.yml)
+[![Release](https://img.shields.io/github/v/release/OthmaneBlial/term_mcp_deepseek?label=release)](https://github.com/OthmaneBlial/term_mcp_deepseek/releases/latest)
+[![Release assets](https://img.shields.io/github/downloads/OthmaneBlial/term_mcp_deepseek/total?label=release%20assets)](https://github.com/OthmaneBlial/term_mcp_deepseek/releases)
+[![MCP compatibility](https://img.shields.io/badge/MCP-STDIO%20%2B%20HTTP%20tested-1f6feb)](docs/MCP_COMPATIBILITY.md)
 
 **See the command, risk, workspace, and limits before anything runs. Then keep a signed receipt of what actually happened.**
 
@@ -102,6 +107,8 @@ term-mcp recipe run examples/recipes/inspect-repository.json --workspace .
 
 Browse the [recipe catalog and contribution template](examples/README.md). CI executes the complete catalog and runs the [no-model benchmark](docs/BENCHMARKS.md).
 
+See the [proof gallery](docs/GALLERY.md) for signed, sharing-redacted success, cancellation, and timeout receipts. The [three short demos](docs/DEMOS.md) apply the recipes to an unfamiliar repository, a test surface, and local incident evidence.
+
 ## MCP clients
 
 The server targets modern MCP `2026-07-28` and supports the legacy `2025-11-25` initialize lifecycle. HTTP and STDIO share one dispatcher and tool catalog.
@@ -180,7 +187,9 @@ Do not commit `.env`. Add `DEEPSEEK_API_KEY` only for the optional advisor panel
 | Deployment and rollback | [Operations](docs/OPERATIONS.md) |
 | Security assumptions | [Security policy](SECURITY.md) and [threat model](docs/THREAT_MODEL.md) |
 | Safe examples | [Recipe catalog](examples/README.md) |
+| Receipts and concrete demos | [Proof gallery](docs/GALLERY.md) and [demo scripts](docs/DEMOS.md) |
 | Local performance evidence | [Benchmark contract](docs/BENCHMARKS.md) |
+| Adoption without telemetry | [Adoption evidence](docs/ADOPTION.md) |
 | Direction and acceptance criteria | [Roadmap](ROADMAP.md) |
 | Release history | [Changelog](CHANGELOG.md) |
 

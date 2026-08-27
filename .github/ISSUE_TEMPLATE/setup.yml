@@ -1,0 +1,55 @@
+name: Setup or first-result problem
+description: Report a clean install, startup, doctor, demo, or first-run failure
+title: "onboarding: "
+labels: ["bug", "onboarding", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Never paste tokens, private paths, private output, or an unredacted receipt.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: term-mcp version, release tag, or git commit
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: macOS/Linux, OS version, Python version, install method
+    validations:
+      required: true
+  - type: dropdown
+    id: path
+    attributes:
+      label: Path attempted
+      options: [pipx release install, clone and startup.sh, Docker, STDIO client, HTTP server]
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Minimal safe reproduction
+      description: Include commands after removing tokens and private paths.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Redacted doctor output or structured error
+      render: json
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and observed result
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed tokens, private paths, command output, and personal data.
+          required: true

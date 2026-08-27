@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "id": "10000000-0000-4000-8000-000000000003",
+  "plan_id": "20000000-0000-4000-8000-000000000003",
+  "session_id": "30000000-0000-4000-8000-000000000003",
+  "command": "[REDACTED FOR SHARING]",
+  "command_sha256": "269eb6af1b40c3d6992a84c934da2d4b5e07a8bb1d437c4686661aa3e06ca4cc",
+  "cwd": "[REDACTED FOR SHARING]",
+  "mode": "confirm",
+  "risk": "medium",
+  "approved": true,
+  "policy": {
+    "allowed": true,
+    "risk": "medium",
+    "requires_approval": true,
+    "reasons": [
+      "Bounded process exceeded its approved timeout."
+    ],
+    "argv": []
+  },
+  "status": "timed_out",
+  "started_at": "2026-08-27T09:02:00+00:00",
+  "finished_at": "2026-08-27T09:02:02+00:00",
+  "duration_ms": 2000,
+  "exit_code": -15,
+  "signal": 15,
+  "stdout": "[REDACTED FOR SHARING]",
+  "stderr": "[REDACTED FOR SHARING]",
+  "output_truncated": false,
+  "sharing_redacted": true,
+  "signature": "6ef4e9a520b0800ecc038f803a375c12ec465d885fc632a0565a11855a0445fa"
+}

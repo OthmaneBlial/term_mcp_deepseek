@@ -4,6 +4,19 @@ All notable changes are documented here. The project follows [Semantic Versionin
 
 ## [Unreleased]
 
+### Added
+
+- Inspect-only community recipes, a versioned recipe schema and runner, a no-model benchmark, contributor documentation, safe public challenges, and architecture decisions.
+- A proof gallery with CI-verified sharing-redacted receipts for success, cancellation, and timeout states.
+- Reproducible unknown-repository, test-surface, and local-incident demos.
+- A public adoption snapshot based on GitHub evidence, with no product telemetry.
+- Dedicated onboarding and opt-in example-reuse issue paths plus categorized contributor-aware release notes.
+
+### Changed
+
+- Linked each MCP compatibility claim to executable tests, pinned commands, configuration, or an explicitly open verification issue.
+- Added factual CI, coverage, security, release-asset, version, and MCP compatibility badges; CI rejects a stale coverage badge.
+
 ## [0.10.0] - 2026-08-27
 
 ### Added
