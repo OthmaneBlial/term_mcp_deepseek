@@ -4,58 +4,60 @@ Provides security validation for user inputs and command execution
 """
 
 import re
-import os
-from typing import Optional, List, Dict, Any
+from typing import Any
+
 from config import Config
+
 config = Config()
+
 
 class InputValidator:
     """Comprehensive input validation and sanitization"""
 
     # Dangerous commands and patterns
     DANGEROUS_COMMANDS = [
-        'rm -rf /',
-        'rm -rf /*',
-        'rm -rf ~',
-        'rm -rf .*',
-        'dd if=',
-        'mkfs',
-        'fdisk',
-        'format',
-        'shutdown',
-        'reboot',
-        'halt',
-        'poweroff',
-        'systemctl stop',
-        'service stop',
-        'killall',
-        'pkill -9',
-        'chmod 777',
-        'chown root',
-        'su root',
-        'sudo',
-        'passwd',
-        'usermod',
-        'userdel',
-        'groupmod',
-        'mount',
-        'umount',
-        'fsck',
-        'e2fsck'
+        "rm -rf /",
+        "rm -rf /*",
+        "rm -rf ~",
+        "rm -rf .*",
+        "dd if=",
+        "mkfs",
+        "fdisk",
+        "format",
+        "shutdown",
+        "reboot",
+        "halt",
+        "poweroff",
+        "systemctl stop",
+        "service stop",
+        "killall",
+        "pkill -9",
+        "chmod 777",
+        "chown root",
+        "su root",
+        "sudo",
+        "passwd",
+        "usermod",
+        "userdel",
+        "groupmod",
+        "mount",
+        "umount",
+        "fsck",
+        "e2fsck",
     ]
 
     # Dangerous patterns (regex)
     DANGEROUS_PATTERNS = [
-        r'rm\s+-rf\s+/?',  # rm -rf / or rm -rf /*
-        r'rm\s+-rf\s+\*',  # rm -rf *
-        r'rm\s+-rf\s+\.\*',  # rm -rf .*
-        r'>\s*/dev/',  # redirect to device files
-        r'\|.*sh\s*$',  # pipe to shell
-        r';\s*rm\s+',  # command injection with rm
-        r'`.*rm.*`',  # command substitution with rm
-        r'\$\(.*rm.*\)',  # command substitution with rm
-        r'curl.*\|\s*sh',  # curl pipe sh
-        r'wget.*\|\s*sh',  # wget pipe sh
+        r"rm\s+-rf\s+/?",  # rm -rf / or rm -rf /*
+        r"rm\s+-rf\s+\*",  # rm -rf *
+        r"rm\s+-rf\s+\.\*",  # rm -rf .*
+        r">\s*/dev/",  # redirect to device files
+        r"\|.*sh\s*$",  # pipe to shell
+        r";\s*rm\s+",  # command injection with rm
+        r"`.*rm.*`",  # command substitution with rm
+        r"\$\(.*rm.*\)",  # command substitution with rm
+        r"curl.*\|\s*sh",  # curl pipe sh
+        r"wget.*\|\s*sh",  # wget pipe sh
     ]
 
     @staticmethod
@@ -77,9 +79,11 @@ class InputValidator:
 
         # Basic sanitization - remove suspicious characters
         # Allow: alphanumeric, spaces, common symbols (-_./:), quotes
-        if not re.match(r'^[a-zA-Z0-9\s\-_\./:\'\"]+$', command):
+        if not re.match(r"^[a-zA-Z0-9\s\-_\./:\'\"]+$", command):
             # More permissive pattern for complex commands
-            if not re.match(r'^[a-zA-Z0-9\s\-_\./:\'\"\|\&\;\<\>\(\)\[\]\{\}\?\*\+\^\$\@\#\%\=\!]+$', command):
+            if not re.match(
+                r"^[a-zA-Z0-9\s\-_\./:\'\"\|\&\;\<\>\(\)\[\]\{\}\?\*\+\^\$\@\#\%\=\!]+$", command
+            ):
                 raise ValueError("Command contains invalid characters")
 
         return command
@@ -102,7 +106,7 @@ class InputValidator:
         return False
 
     @staticmethod
-    def validate_json_input(data: Any) -> Dict[str, Any]:
+    def validate_json_input(data: Any) -> dict[str, Any]:
         """Validate JSON input data"""
         if not isinstance(data, dict):
             raise ValueError("Input must be a JSON object")
@@ -117,20 +121,20 @@ class InputValidator:
             raise ValueError("File path must be a non-empty string")
 
         # Remove dangerous path components
-        if '..' in file_path:
+        if ".." in file_path:
             raise ValueError("Path traversal not allowed (..)")
 
-        if file_path.startswith('/'):
+        if file_path.startswith("/"):
             raise ValueError("Absolute paths not allowed")
 
         # Basic sanitization
         file_path = file_path.strip()
 
         # Remove leading/trailing slashes
-        file_path = file_path.strip('/')
+        file_path = file_path.strip("/")
 
         # Check for suspicious characters
-        if any(char in file_path for char in ['<', '>', '|', '&', ';', '`', '$', '(', ')']):
+        if any(char in file_path for char in ["<", ">", "|", "&", ";", "`", "$", "(", ")"]):
             raise ValueError("File path contains invalid characters")
 
         return file_path
@@ -149,9 +153,11 @@ class InputValidator:
 
         # Basic content validation - allow common characters
         # This is permissive to allow various languages and symbols
-        if not re.match(r'^[\w\s\.,!?\-_\'\"@#$%^&*()+=[\]{}|\\:;/<>~`]*$', message, re.UNICODE):
+        if not re.match(r"^[\w\s\.,!?\-_\'\"@#$%^&*()+=[\]{}|\\:;/<>~`]*$", message, re.UNICODE):
             # Allow newlines and tabs
-            if not re.match(r'^[\w\s\.,!?\-_\'\"@#$%^&*()+=[\]{}|\\:;/<>~`\n\t\r]*$', message, re.UNICODE):
+            if not re.match(
+                r"^[\w\s\.,!?\-_\'\"@#$%^&*()+=[\]{}|\\:;/<>~`\n\t\r]*$", message, re.UNICODE
+            ):
                 raise ValueError("Message contains invalid characters")
 
         return message
@@ -167,7 +173,7 @@ class InputValidator:
             raise ValueError("Session ID length invalid")
 
         # Allow URL-safe characters
-        if not re.match(r'^[a-zA-Z0-9_-]+$', session_id):
+        if not re.match(r"^[a-zA-Z0-9_-]+$", session_id):
             raise ValueError("Session ID contains invalid characters")
 
         return session_id
@@ -184,7 +190,7 @@ class InputValidator:
             raise ValueError("User ID too long")
 
         # Allow alphanumeric, underscore, dash, dot
-        if not re.match(r'^[a-zA-Z0-9_.-]+$', user_id):
+        if not re.match(r"^[a-zA-Z0-9_.-]+$", user_id):
             raise ValueError("User ID contains invalid characters")
 
         return user_id
@@ -198,11 +204,7 @@ class InputValidator:
         tool_name = tool_name.strip()
 
         # Allow specific tool names
-        valid_tools = [
-            'write_to_terminal',
-            'read_terminal_output',
-            'send_control_character'
-        ]
+        valid_tools = ["write_to_terminal", "read_terminal_output", "send_control_character"]
 
         if tool_name not in valid_tools:
             raise ValueError(f"Unknown tool: {tool_name}")
@@ -214,8 +216,8 @@ class InputValidator:
         """Validate lines of output parameter"""
         try:
             lines = int(lines)
-        except (ValueError, TypeError):
-            raise ValueError("Lines of output must be a number")
+        except (ValueError, TypeError) as error:
+            raise ValueError("Lines of output must be a number") from error
 
         if lines < 1 or lines > 1000:
             raise ValueError("Lines of output must be between 1 and 1000")
@@ -235,11 +237,16 @@ class InputValidator:
 
         return char
 
+
 class ValidationError(Exception):
     """Custom exception for validation errors"""
+
     pass
 
-def validate_request_data(data: Dict[str, Any], required_fields: List[str] = None) -> Dict[str, Any]:
+
+def validate_request_data(
+    data: dict[str, Any], required_fields: list[str] = None
+) -> dict[str, Any]:
     """Validate request data structure"""
     if required_fields:
         for field in required_fields:
@@ -248,28 +255,30 @@ def validate_request_data(data: Dict[str, Any], required_fields: List[str] = Non
 
     return data
 
+
 # Convenience functions for common validations
-def validate_chat_request(data: Dict[str, Any]) -> Dict[str, Any]:
+def validate_chat_request(data: dict[str, Any]) -> dict[str, Any]:
     """Validate chat request data"""
-    data = validate_request_data(data, ['message'])
-    data['message'] = InputValidator.validate_message(data['message'])
+    data = validate_request_data(data, ["message"])
+    data["message"] = InputValidator.validate_message(data["message"])
     return data
 
-def validate_tool_call(data: Dict[str, Any]) -> Dict[str, Any]:
+
+def validate_tool_call(data: dict[str, Any]) -> dict[str, Any]:
     """Validate tool call data"""
-    data = validate_request_data(data, ['name', 'arguments'])
-    data['name'] = InputValidator.validate_tool_name(data['name'])
+    data = validate_request_data(data, ["name", "arguments"])
+    data["name"] = InputValidator.validate_tool_name(data["name"])
 
     # Validate arguments based on tool
-    if data['name'] == 'write_to_terminal':
-        data['arguments']['command'] = InputValidator.sanitize_command(data['arguments']['command'])
-    elif data['name'] == 'read_terminal_output':
-        data['arguments']['linesOfOutput'] = InputValidator.validate_lines_of_output(
-            data['arguments'].get('linesOfOutput', 25)
+    if data["name"] == "write_to_terminal":
+        data["arguments"]["command"] = InputValidator.sanitize_command(data["arguments"]["command"])
+    elif data["name"] == "read_terminal_output":
+        data["arguments"]["linesOfOutput"] = InputValidator.validate_lines_of_output(
+            data["arguments"].get("linesOfOutput", 25)
         )
-    elif data['name'] == 'send_control_character':
-        data['arguments']['letter'] = InputValidator.validate_control_character(
-            data['arguments']['letter']
+    elif data["name"] == "send_control_character":
+        data["arguments"]["letter"] = InputValidator.validate_control_character(
+            data["arguments"]["letter"]
         )
 
     return data

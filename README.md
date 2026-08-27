@@ -1,155 +1,80 @@
-# DeepSeek MCP-like Server for Terminal
+# Term MCP DeepSeek
 
+[![CI](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/ci.yml/badge.svg)](https://github.com/OthmaneBlial/term_mcp_deepseek/actions/workflows/ci.yml)
 [![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/OthmaneBlial/term_mcp_deepseek)](https://archestra.ai/mcp-catalog/othmaneblial__term_mcp_deepseek)
-This project is an MCP‑like server using the DeepSeek API. It aims to demonstrate the core concepts behind the Model Context Protocol (MCP) by exposing endpoints that allow AI assistants to:
 
-- List available tools.
-- Invoke commands on an active shell session.
-- Integrate with an AI chat (DeepSeek) that can include special instructions (e.g., `CMD:` lines) to trigger command execution.
+A local terminal copilot powered by DeepSeek, with one shared JSON-RPC dispatcher for HTTP and STDIO clients.
 
-> **Note:** While this implementation captures many of the MCP ideas and includes features like real-time streaming, session management, and basic security, it is not yet a fully compliant MCP server as defined by Anthropic. It is designed as a proof-of-concept, and further enhancements (e.g., complete JSON‑RPC protocol support, advanced authentication, and comprehensive error handling) would be needed for production use.
+The repository is moving from a proof of concept toward a safe, inspectable MCP server. The current 0.9 line is for local development only: do not expose it to an untrusted network until the security phase in the roadmap is complete.
 
-## Features
+## Quick start
 
-- **Chat Interface:**
-  A modern web-based chat client (using Flask and Tailwind CSS) where users can interact with the server, now with real-time updates and improved error handling.
+Requirements: Python 3.10 or newer and Bash.
 
-- **AI Integration:**
-  Uses the DeepSeek API to generate responses. The AI can instruct the server to execute terminal commands by including lines beginning with `CMD:`.
+    git clone https://github.com/OthmaneBlial/term_mcp_deepseek.git
+    cd term_mcp_deepseek
+    cp .env.example .env
+    ./startup.sh
 
-- **Terminal Command Execution:**
-  Executes shell commands via a persistent Bash session using the `pexpect` library and returns output to the client, with added real-time streaming capabilities.
+The server listens on http://127.0.0.1:8000 by default.
 
-- **MCP Endpoints:**
-  Provides `/mcp/list_tools` and `/mcp/call_tool` endpoints that mimic MCP tool discovery and invocation, with expanded protocol support including prompts, resources, and roots.
+The DeepSeek key is optional for health checks, tool discovery, STDIO and local protocol tests. Add DEEPSEEK_API_KEY to ".env" only when using chat.
 
-- **Real-time Streaming:**
-  Server-Sent Events (SSE) for live command execution updates and terminal output.
+## One CLI
 
-- **Security Enhancements:**
-  Basic authentication, rate limiting, input validation, and security headers for safer operation.
+    term-mcp serve
+    term-mcp stdio
+    term-mcp doctor
+    term-mcp version
 
-- **Multiple Transport Options:**
-  Supports both HTTP REST API and STDIO command-line interface for flexibility.
+The compatibility files "server.py" and "stdio_server.py" delegate to this CLI; they do not contain separate server implementations.
 
-- **Session Management:**
-  Improved session handling and conversation storage.
+## HTTP contract
 
-- **Docker Support:**
-  Containerization for easier deployment and testing.
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | /health | Readiness and package version |
+| GET | / | Local chat interface |
+| POST | /chat | DeepSeek chat bridge |
+| GET | /mcp/info | Declared capabilities |
+| POST | /mcp | JSON-RPC dispatcher |
+| GET | /stream?session_id=... | SSE session events |
 
-## Getting Started
+Example tool discovery:
 
-### Prerequisites
+    curl http://127.0.0.1:8000/mcp \
+      -H "Content-Type: application/json" \
+      -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'
 
-- Python 3.8+
-- [pip](https://pip.pypa.io/)
-- A valid DeepSeek API key
+## STDIO contract
 
-### Installation
+STDOUT contains JSON-RPC responses only; diagnostics are written to STDERR.
 
-1. **Clone the repository:**
+    printf '%s\n' '{"jsonrpc":"2.0","method":"tools/list","id":1}' \
+      | python -m term_mcp_deepseek stdio
 
-   ```bash
-   git clone https://github.com/OthmaneBlial/term_mcp_deepseek.git
-   cd term_mcp_deepseek
-   ```
+HTTP and STDIO use the same dispatcher and business methods.
 
-2. **Create and activate a virtual environment:**
+## Docker
 
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-   ```
+    docker compose up --build
 
-3. **Install the required dependencies:**
+The container and health check use port 8000. The repository is mounted read-write at "/workspace" in the development compose profile.
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Development
 
-4. **Configure your API key:**
+    ./local_ci.sh
 
-   Update the `DEEPSEEK_API_KEY` in `.env` with your DeepSeek API key.
+The local CI command installs the project with development dependencies, checks formatting and lint, then runs the complete test suite with measured coverage.
 
-### Running the Server
+## Project direction
 
-#### Quick Start
+The full, dependency-ordered plan is in [ROADMAP.md](ROADMAP.md). The central product flow is:
 
-Use the provided startup script for convenience:
+    plan → risk analysis → approval → bounded execution → receipt
 
-```bash
-chmod +x startup.sh
-./startup.sh
-```
-
-#### Manual Start
-
-Run the Flask server with:
-
-```bash
-python server.py
-```
-
-Visit [http://127.0.0.1:8000](http://127.0.0.1:8000) to access the chat interface.
-
-#### Docker
-
-For containerized deployment:
-
-```bash
-docker-compose up -d
-```
-
-## Endpoints
-
-### Chat Endpoint
-- **URL:** `/chat`
-- **Method:** `POST`
-- **Payload:** `{ "message": "your message here" }`
-- **Description:**
-  Adds the user message to the conversation, sends it to the DeepSeek API, looks for any command instructions (`CMD:`), executes them, and returns the final response.
-
-### MCP Endpoints
-
-#### List Tools
-- **URL:** `/mcp/list_tools`
-- **Method:** `POST`
-- **Response:**
-  JSON listing available tools (e.g., `write_to_terminal`, `read_terminal_output`, `send_control_character`).
-
-#### Call Tool
-- **URL:** `/mcp/call_tool`
-- **Method:** `POST`
-- **Payload:**
-  ```json
-  {
-    "name": "tool_name",
-    "arguments": { ... }
-  }
-  ```
-- **Description:**
-  Directly invoke a tool command on the server.
-
-### Real-time Streaming
-- **URL:** `/stream?session_id=session_id`
-- **Method:** `GET`
-- **Description:** Server-Sent Events endpoint for real-time command output updates.
-
-## Future Improvements
-
-- **Protocol Standardization:**
-  Implement JSON‑RPC for a more robust and standardized communication protocol.
-
-- **Real-time Communication:**
-  Add Server‑Sent Events (SSE) or WebSockets for live command output streaming.
-
-- **Session & Security Enhancements:**
-  Introduce per‑user sessions, proper authentication, input sanitization, and comprehensive error handling.
-
-- **Modular Code Architecture:**
-  Further separate API logic from business logic for better maintainability and scalability.
+Security limits are documented honestly as they are implemented. A passing syntax check or a decorative badge is not treated as proof of protocol compatibility or production readiness.
 
 ## License
 
-This project is open-source and available under the [MIT License](LICENSE).
+MIT. See [LICENSE](LICENSE).

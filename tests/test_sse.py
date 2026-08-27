@@ -1,9 +1,9 @@
-import pytest
+def test_stream_starts_with_session_hello(client):
+    response = client.get("/stream?session_id=session-test", buffered=False)
 
-def test_stream_hello(app):
-    client = app.test_client()
-    # bypass auth by setting optional=True or inject a valid token
-    rv = client.get("/stream?session_id=t1", headers={"Authorization":"Bearer testtoken"}, buffered=True)
-    assert rv.status_code == 200
-    body = b"".join(rv.response)[:200].decode("utf-8", "ignore")
-    assert "event: hello" in body
+    first_chunk = next(response.response).decode("utf-8")
+    response.close()
+
+    assert response.status_code == 200
+    assert "event: hello" in first_chunk
+    assert '"session": "session-test"' in first_chunk

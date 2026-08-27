@@ -1,8 +1,21 @@
-from server_new import create_app
+def test_health_reports_version(client):
+    response = client.get("/health")
 
-def test_health():
-    app = create_app()
-    client = app.test_client()
-    r = client.get("/health")
-    assert r.status_code == 200
-    assert r.get_json()["status"] == "ok"
+    assert response.status_code == 200
+    assert response.get_json()["status"] == "ok"
+    assert response.get_json()["version"] == "0.9.0"
+    assert response.headers["X-MCP-Version"] == "2025-03-26"
+
+
+def test_root_serves_chat(client):
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert b"Term MCP DeepSeek" in response.data
+
+
+def test_info_uses_package_version(client):
+    response = client.get("/mcp/info")
+
+    assert response.status_code == 200
+    assert response.get_json()["version"] == "0.9.0"

@@ -4,14 +4,17 @@ Handles MCP protocol implementation and terminal operations
 """
 
 import asyncio
-from typing import Dict, Any, List
-from tools.command_executor import CommandExecutor
-from tools.tty_output_reader import TtyOutputReader
-from tools.send_control_character import SendControlCharacter
-from tools.json_rpc import JSONRPCError
-from tools.input_validator import InputValidator
+from typing import Any
+
 from config import Config
+from tools.command_executor import CommandExecutor
+from tools.input_validator import InputValidator
+from tools.json_rpc import JSONRPCError
+from tools.send_control_character import SendControlCharacter
+from tools.tty_output_reader import TtyOutputReader
+
 config = Config()
+
 
 class MCPServer:
     """MCP Server implementation with business logic"""
@@ -33,7 +36,7 @@ class MCPServer:
         jsonrpc_server.register_method("roots/list", self.list_roots)
 
     # MCP Tools
-    def list_tools(self) -> Dict[str, Any]:
+    def list_tools(self) -> dict[str, Any]:
         """List available MCP tools"""
         return {
             "tools": [
@@ -45,11 +48,11 @@ class MCPServer:
                         "properties": {
                             "command": {
                                 "type": "string",
-                                "description": "The command to run or text to write"
+                                "description": "The command to run or text to write",
                             }
                         },
-                        "required": ["command"]
-                    }
+                        "required": ["command"],
+                    },
                 },
                 {
                     "name": "read_terminal_output",
@@ -59,11 +62,11 @@ class MCPServer:
                         "properties": {
                             "linesOfOutput": {
                                 "type": "number",
-                                "description": "How many lines from the bottom to read"
+                                "description": "How many lines from the bottom to read",
                             }
                         },
-                        "required": ["linesOfOutput"]
-                    }
+                        "required": ["linesOfOutput"],
+                    },
                 },
                 {
                     "name": "send_control_character",
@@ -73,16 +76,16 @@ class MCPServer:
                         "properties": {
                             "letter": {
                                 "type": "string",
-                                "description": "Letter for the control char (e.g. 'C' for Ctrl-C)"
+                                "description": "Letter for the control char (e.g. 'C' for Ctrl-C)",
                             }
                         },
-                        "required": ["letter"]
-                    }
-                }
+                        "required": ["letter"],
+                    },
+                },
             ]
         }
 
-    def call_tool(self, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    def call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         """Call an MCP tool"""
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -96,11 +99,14 @@ class MCPServer:
         else:
             raise JSONRPCError(-32601, "Method not found", f"Unknown tool '{name}'")
 
-    def _execute_write_terminal(self, arguments: Dict[str, Any], loop: asyncio.AbstractEventLoop) -> Dict[str, Any]:
+    def _execute_write_terminal(
+        self, arguments: dict[str, Any], loop: asyncio.AbstractEventLoop
+    ) -> dict[str, Any]:
         """Execute write_to_terminal tool"""
         command = InputValidator.sanitize_command(arguments.get("command", ""))
 
         executor = CommandExecutor(self.shell)
+
         async def do_write():
             before_buffer = TtyOutputReader.get_buffer()
             before_lines = len(before_buffer.split("\n"))
@@ -111,31 +117,25 @@ class MCPServer:
             after_lines = len(after_buffer.split("\n"))
             diff = after_lines - before_lines
 
-            msg = (f"{diff} lines were output after sending the command to the terminal. "
-                   f"Read the last {diff} lines of terminal contents to orient yourself. "
-                   f"Never assume that the command was executed or that it was successful.")
+            msg = (
+                f"{diff} lines were output after sending the command to the terminal. "
+                f"Read the last {diff} lines of terminal contents to orient yourself. "
+                f"Never assume that the command was executed or that it was successful."
+            )
             return msg
 
         result_msg = loop.run_until_complete(do_write())
-        return {
-            "content": [{
-                "type": "text",
-                "text": result_msg
-            }]
-        }
+        return {"content": [{"type": "text", "text": result_msg}]}
 
-    def _execute_read_terminal(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_read_terminal(self, arguments: dict[str, Any]) -> dict[str, Any]:
         """Execute read_terminal_output tool"""
-        lines_of_output = InputValidator.validate_lines_of_output(arguments.get("linesOfOutput", 25))
+        lines_of_output = InputValidator.validate_lines_of_output(
+            arguments.get("linesOfOutput", 25)
+        )
         output = TtyOutputReader.call(lines_of_output)
-        return {
-            "content": [{
-                "type": "text",
-                "text": output
-            }]
-        }
+        return {"content": [{"type": "text", "text": output}]}
 
-    def _execute_send_control(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_send_control(self, arguments: dict[str, Any]) -> dict[str, Any]:
         """Execute send_control_character tool"""
         letter = InputValidator.validate_control_character(arguments.get("letter", ""))
 
@@ -143,50 +143,49 @@ class MCPServer:
         try:
             sender.send(letter)
         except Exception as e:
-            raise JSONRPCError(-32603, "Internal error", str(e))
+            raise JSONRPCError(-32603, "Internal error", str(e)) from e
 
         return {
-            "content": [{
-                "type": "text",
-                "text": f"Sent control character: Control-{letter.upper()}"
-            }]
+            "content": [
+                {"type": "text", "text": f"Sent control character: Control-{letter.upper()}"}
+            ]
         }
 
     # MCP Prompts
-    def list_prompts(self) -> Dict[str, Any]:
+    def list_prompts(self) -> dict[str, Any]:
         """List available MCP prompts"""
         return {
             "prompts": [
                 {
                     "name": "terminal_help",
                     "description": "Get help with terminal commands and operations",
-                    "arguments": []
+                    "arguments": [],
                 },
                 {
                     "name": "file_operations",
                     "description": "Common file and directory operations",
-                    "arguments": []
+                    "arguments": [],
                 },
                 {
                     "name": "system_info",
                     "description": "Get system information and status",
-                    "arguments": []
+                    "arguments": [],
                 },
                 {
                     "name": "process_management",
                     "description": "Manage running processes",
-                    "arguments": []
-                }
+                    "arguments": [],
+                },
             ]
         }
 
-    def get_prompt(self, name: str, arguments: Dict[str, Any] = None) -> Dict[str, Any]:
+    def get_prompt(self, name: str, arguments: dict[str, Any] = None) -> dict[str, Any]:
         """Get a specific MCP prompt"""
         prompts = {
             "terminal_help": self._get_terminal_help_prompt(),
             "file_operations": self._get_file_operations_prompt(),
             "system_info": self._get_system_info_prompt(),
-            "process_management": self._get_process_management_prompt()
+            "process_management": self._get_process_management_prompt(),
         }
 
         if name not in prompts:
@@ -194,7 +193,7 @@ class MCPServer:
 
         return prompts[name]
 
-    def _get_terminal_help_prompt(self) -> Dict[str, Any]:
+    def _get_terminal_help_prompt(self) -> dict[str, Any]:
         """Get terminal help prompt"""
         content = """You are a terminal assistant. Help the user with shell commands and terminal operations.
 
@@ -220,15 +219,10 @@ When the user asks for help with terminal operations, provide clear explanations
 
         return {
             "description": "Get help with terminal commands and operations",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": content
-                }
-            ]
+            "messages": [{"role": "system", "content": content}],
         }
 
-    def _get_file_operations_prompt(self) -> Dict[str, Any]:
+    def _get_file_operations_prompt(self) -> dict[str, Any]:
         """Get file operations prompt"""
         content = """You are a file operations assistant. Help with file and directory management.
 
@@ -250,15 +244,10 @@ Always be careful with destructive operations like rm -rf."""
 
         return {
             "description": "Common file and directory operations",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": content
-                }
-            ]
+            "messages": [{"role": "system", "content": content}],
         }
 
-    def _get_system_info_prompt(self) -> Dict[str, Any]:
+    def _get_system_info_prompt(self) -> dict[str, Any]:
         """Get system info prompt"""
         content = """You are a system information assistant. Help gather system details.
 
@@ -277,15 +266,10 @@ Provide clear, organized information about the system's current state."""
 
         return {
             "description": "Get system information and status",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": content
-                }
-            ]
+            "messages": [{"role": "system", "content": content}],
         }
 
-    def _get_process_management_prompt(self) -> Dict[str, Any]:
+    def _get_process_management_prompt(self) -> dict[str, Any]:
         """Get process management prompt"""
         content = """You are a process management assistant. Help with running processes.
 
@@ -303,114 +287,103 @@ Monitor system resources and manage process lifecycle effectively."""
 
         return {
             "description": "Manage running processes",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": content
-                }
-            ]
+            "messages": [{"role": "system", "content": content}],
         }
 
     # MCP Resources
-    def list_resources(self) -> Dict[str, Any]:
+    def list_resources(self) -> dict[str, Any]:
         """List available MCP resources"""
         # Implementation similar to original
         resources = []
 
         try:
             import os
+
             cwd = os.getcwd()
-            resources.append({
-                "uri": f"file://{cwd}",
-                "name": "Current Working Directory",
-                "description": f"Current working directory: {cwd}",
-                "mimeType": "inode/directory"
-            })
+            resources.append(
+                {
+                    "uri": f"file://{cwd}",
+                    "name": "Current Working Directory",
+                    "description": f"Current working directory: {cwd}",
+                    "mimeType": "inode/directory",
+                }
+            )
 
             # List some files in current directory
             for item in os.listdir(cwd)[:10]:  # Limit to first 10 items
                 item_path = os.path.join(cwd, item)
                 if os.path.isfile(item_path):
-                    resources.append({
-                        "uri": f"file://{item_path}",
-                        "name": f"File: {item}",
-                        "description": f"File: {item}",
-                        "mimeType": "text/plain"
-                    })
+                    resources.append(
+                        {
+                            "uri": f"file://{item_path}",
+                            "name": f"File: {item}",
+                            "description": f"File: {item}",
+                            "mimeType": "text/plain",
+                        }
+                    )
         except Exception:
             pass  # Ignore errors when listing resources
 
         # Terminal output resource
-        resources.append({
-            "uri": "terminal://output",
-            "name": "Terminal Output Buffer",
-            "description": "Current terminal output buffer",
-            "mimeType": "text/plain"
-        })
+        resources.append(
+            {
+                "uri": "terminal://output",
+                "name": "Terminal Output Buffer",
+                "description": "Current terminal output buffer",
+                "mimeType": "text/plain",
+            }
+        )
 
         # System info resource
-        resources.append({
-            "uri": "system://info",
-            "name": "System Information",
-            "description": "Basic system information",
-            "mimeType": "text/plain"
-        })
+        resources.append(
+            {
+                "uri": "system://info",
+                "name": "System Information",
+                "description": "Basic system information",
+                "mimeType": "text/plain",
+            }
+        )
 
         return {"resources": resources}
 
-    def read_resource(self, uri: str) -> Dict[str, Any]:
+    def read_resource(self, uri: str) -> dict[str, Any]:
         """Read a specific MCP resource"""
         if uri.startswith("file://"):
             file_path = uri[7:]  # Remove "file://" prefix
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
-                return {
-                    "contents": [{
-                        "uri": uri,
-                        "mimeType": "text/plain",
-                        "text": content
-                    }]
-                }
+                return {"contents": [{"uri": uri, "mimeType": "text/plain", "text": content}]}
             except Exception as e:
-                raise JSONRPCError(-32603, "Internal error", f"Cannot read file: {str(e)}")
+                raise JSONRPCError(-32603, "Internal error", f"Cannot read file: {str(e)}") from e
 
         elif uri == "terminal://output":
             output = TtyOutputReader.get_buffer()
-            return {
-                "contents": [{
-                    "uri": uri,
-                    "mimeType": "text/plain",
-                    "text": output
-                }]
-            }
+            return {"contents": [{"uri": uri, "mimeType": "text/plain", "text": output}]}
 
         elif uri == "system://info":
             try:
-                import platform
                 import os
+                import platform
+
                 info = f"""System Information:
 OS: {platform.system()} {platform.release()}
 Platform: {platform.platform()}
 Python: {platform.python_version()}
 Current Directory: {os.getcwd()}
-User: {os.getlogin() if hasattr(os, 'getlogin') else 'Unknown'}
+User: {os.getlogin() if hasattr(os, "getlogin") else "Unknown"}
 """
-                return {
-                    "contents": [{
-                        "uri": uri,
-                        "mimeType": "text/plain",
-                        "text": info
-                    }]
-                }
+                return {"contents": [{"uri": uri, "mimeType": "text/plain", "text": info}]}
             except Exception as e:
-                raise JSONRPCError(-32603, "Internal error", f"Cannot get system info: {str(e)}")
+                raise JSONRPCError(
+                    -32603, "Internal error", f"Cannot get system info: {str(e)}"
+                ) from e
 
         else:
             raise JSONRPCError(-32601, "Method not found", f"Unknown resource URI: {uri}")
 
     # MCP Roots
-    def list_roots(self) -> Dict[str, Any]:
+    def list_roots(self) -> dict[str, Any]:
         """List available MCP roots"""
         roots = []
 
@@ -419,64 +392,74 @@ User: {os.getlogin() if hasattr(os, 'getlogin') else 'Unknown'}
 
             # Current working directory
             cwd = os.getcwd()
-            roots.append({
-                "uri": f"file://{cwd}",
-                "name": "Current Working Directory",
-                "description": f"Current working directory: {cwd}"
-            })
+            roots.append(
+                {
+                    "uri": f"file://{cwd}",
+                    "name": "Current Working Directory",
+                    "description": f"Current working directory: {cwd}",
+                }
+            )
 
             # Home directory
             home = os.path.expanduser("~")
-            roots.append({
-                "uri": f"file://{home}",
-                "name": "Home Directory",
-                "description": f"User home directory: {home}"
-            })
+            roots.append(
+                {
+                    "uri": f"file://{home}",
+                    "name": "Home Directory",
+                    "description": f"User home directory: {home}",
+                }
+            )
 
             # System root (if accessible)
             if os.access("/", os.R_OK):
-                roots.append({
-                    "uri": "file:///",
-                    "name": "System Root",
-                    "description": "System root directory"
-                })
+                roots.append(
+                    {
+                        "uri": "file:///",
+                        "name": "System Root",
+                        "description": "System root directory",
+                    }
+                )
 
             # Project directory (if we're in a git repo)
             try:
                 import subprocess
-                result = subprocess.run(["git", "rev-parse", "--show-toplevel"],
-                                      capture_output=True, text=True, cwd=cwd)
+
+                result = subprocess.run(
+                    ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, cwd=cwd
+                )
                 if result.returncode == 0:
                     project_root = result.stdout.strip()
-                    roots.append({
-                        "uri": f"file://{project_root}",
-                        "name": "Project Root",
-                        "description": f"Git project root: {project_root}"
-                    })
-            except:
+                    roots.append(
+                        {
+                            "uri": f"file://{project_root}",
+                            "name": "Project Root",
+                            "description": f"Git project root: {project_root}",
+                        }
+                    )
+            except Exception:
                 pass  # Git not available or not in repo
 
         except Exception:
             # Fallback to basic roots
-            roots = [{
-                "uri": "file:///tmp",
-                "name": "Temporary Directory",
-                "description": "System temporary directory"
-            }]
+            roots = [
+                {
+                    "uri": "file:///tmp",
+                    "name": "Temporary Directory",
+                    "description": "System temporary directory",
+                }
+            ]
 
         return {"roots": roots}
 
-    def handle_chat(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def handle_chat(self, data: dict[str, Any]) -> dict[str, Any]:
         """Handle chat request with DeepSeek API integration"""
-        from tools.deepseek_client import chat, DeepseekError
         import re
+
+        from tools.deepseek_client import DeepseekError, chat
 
         message = data.get("message", "").strip()
         if not message:
-            return {
-                "message": "(No message provided)",
-                "session_id": "default"
-            }
+            return {"message": "(No message provided)", "session_id": "default"}
 
         try:
             # Create conversation with system message
@@ -489,12 +472,9 @@ User: {os.getlogin() if hasattr(os, 'getlogin') else 'Unknown'}
                         "CMD: the_command_here\n\n"
                         "The server will intercept that line, run the command, and append the actual output to your final message. "
                         "Only use 'CMD:' if you truly need to run a command."
-                    )
+                    ),
                 },
-                {
-                    "role": "user",
-                    "content": message
-                }
+                {"role": "user", "content": message},
             ]
 
             # Call DeepSeek API using the robust client
@@ -508,7 +488,7 @@ User: {os.getlogin() if hasattr(os, 'getlogin') else 'Unknown'}
 
                 for line in lines:
                     if line.strip().startswith("CMD:"):
-                        cmd = line.strip()[len("CMD:"):].strip()
+                        cmd = line.strip()[len("CMD:") :].strip()
                         if cmd:
                             try:
                                 # Execute the command
@@ -516,11 +496,15 @@ User: {os.getlogin() if hasattr(os, 'getlogin') else 'Unknown'}
                                 asyncio.set_event_loop(loop)
 
                                 executor = CommandExecutor(self.shell)
-                                async def run_cmd():
+
+                                async def run_cmd(
+                                    current_executor=executor,
+                                    current_cmd=cmd,
+                                ):
                                     before_buffer = TtyOutputReader.get_buffer()
                                     before_lines = len(before_buffer.split("\n"))
 
-                                    await executor.execute_command(cmd)
+                                    await current_executor.execute_command(current_cmd)
 
                                     after_buffer = TtyOutputReader.get_buffer()
                                     after_lines = len(after_buffer.split("\n"))
@@ -531,7 +515,7 @@ User: {os.getlogin() if hasattr(os, 'getlogin') else 'Unknown'}
 
                                     # Remove trailing prompt
                                     last_line = new_output.strip().split("\n")[-1]
-                                    if re.search(r'(\$|%|#)\s*$', last_line):
+                                    if re.search(r"(\$|%|#)\s*$", last_line):
                                         splitted = new_output.strip().split("\n")
                                         splitted.pop()
                                         new_output = "\n".join(splitted)
@@ -549,35 +533,33 @@ User: {os.getlogin() if hasattr(os, 'getlogin') else 'Unknown'}
 
                 final_message = "\n".join(final_lines).strip()
 
-            return {
-                "message": final_message,
-                "session_id": "default"
-            }
+            return {"message": final_message, "session_id": "default"}
 
         except DeepseekError as e:
-            return {
-                "message": f"DeepSeek API Error: {str(e)}",
-                "session_id": "default"
-            }
+            return {"message": f"DeepSeek API Error: {str(e)}", "session_id": "default"}
         except Exception as e:
-            return {
-                "message": f"Error: {str(e)}",
-                "session_id": "default"
-            }
+            return {"message": f"Error: {str(e)}", "session_id": "default"}
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         """Get server information"""
+        from term_mcp_deepseek import __version__
+
         return {
             "name": "term-mcp-deepseek",
-            "version": "1.0.0",
+            "version": __version__,
             "description": "MCP server for terminal access with DeepSeek AI integration",
             "capabilities": {
                 "tools": ["write_to_terminal", "read_terminal_output", "send_control_character"],
-                "prompts": ["terminal_help", "file_operations", "system_info", "process_management"],
+                "prompts": [
+                    "terminal_help",
+                    "file_operations",
+                    "system_info",
+                    "process_management",
+                ],
                 "resources": ["file://", "terminal://output", "system://info"],
-                "roots": ["current_directory", "home_directory", "system_root", "project_root"]
+                "roots": ["current_directory", "home_directory", "system_root", "project_root"],
             },
             "transports": ["http", "stdio"],
             "authentication": ["oauth2"],
-            "session_management": True
+            "session_management": True,
         }

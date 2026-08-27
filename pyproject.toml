@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "term-mcp-deepseek"
+version = "0.9.0"
+description = "A local, inspectable terminal copilot with DeepSeek and MCP transports."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Othmane Blial" }]
+keywords = ["mcp", "deepseek", "terminal", "agent", "json-rpc"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+  "Flask>=2.3.3,<4",
+  "PyJWT>=2.9,<3",
+  "pexpect>=4.8,<5",
+  "psutil>=5.9,<8",
+  "python-dotenv>=1.0,<2",
+  "requests>=2.31,<3",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.3,<10",
+  "pytest-cov>=6,<8",
+  "pytest-mock>=3.14,<4",
+]
+dev = [
+  "term-mcp-deepseek[test]",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+term-mcp = "term_mcp_deepseek.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/OthmaneBlial/term_mcp_deepseek"
+Repository = "https://github.com/OthmaneBlial/term_mcp_deepseek"
+Issues = "https://github.com/OthmaneBlial/term_mcp_deepseek/issues"
+
+[tool.setuptools]
+include-package-data = true
+py-modules = ["config", "mcp_server", "server", "stdio_server"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["term_mcp_deepseek*", "api*", "models*", "tools*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+exclude = [".venv", "venv", "htmlcov"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+  "--strict-markers",
+  "--tb=short",
+  "--cov=term_mcp_deepseek",
+  "--cov=api",
+  "--cov=tools.json_rpc",
+  "--cov-report=term-missing",
+  "--cov-fail-under=65",
+]
+markers = [
+  "unit: unit tests",
+  "integration: integration tests",
+  "slow: slow tests",
+  "auth: authentication tests",
+  "api: API tests",
+]

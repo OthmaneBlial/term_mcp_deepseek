@@ -1,6 +1,7 @@
 import re
 import time
 
+
 class SendControlCharacter:
     def __init__(self, shell):
         self.shell = shell
@@ -10,7 +11,7 @@ class SendControlCharacter:
         Send a control character, e.g. letter='C' => Ctrl-C
         """
         letter = letter.upper()
-        if not re.match(r'^[A-Z]$', letter):
+        if not re.match(r"^[A-Z]$", letter):
             raise ValueError("Invalid control character letter (must be A-Z).")
         ctrl_code = chr(ord(letter) - 64)  # 'C' => 3
         self.shell.send(ctrl_code)

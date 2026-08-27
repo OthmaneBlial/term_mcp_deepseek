@@ -1,40 +1,34 @@
-# Use Python 3.10 slim image
-FROM python:3.10-slim
+FROM python:3.12-slim
 
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV FLASK_ENV=production
-ENV JWT_SECRET=${JWT_SECRET}
+ENV PYTHONPATH=/app
+ENV HOST=0.0.0.0
+ENV PORT=8000
 
-# Create app directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+COPY pyproject.toml README.md LICENSE ./
+COPY api ./api
+COPY models ./models
+COPY tools ./tools
+COPY term_mcp_deepseek ./term_mcp_deepseek
+COPY config.py mcp_server.py server.py stdio_server.py ./
+RUN python -m pip install --no-cache-dir .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+COPY static ./static
 
-# Copy application code
-COPY . .
+RUN useradd --create-home --shell /bin/bash appuser \
+    && chown -R appuser:appuser /app
+USER appuser
 
-# Create logs directory
-RUN mkdir -p logs
+EXPOSE 8000
 
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash app \
-    && chown -R app:app /app
-USER app
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl --fail http://127.0.0.1:8000/health || exit 1
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
-
-# Expose port
-EXPOSE 5000
-
-CMD ["bash","startup.sh"]
+CMD ["python", "-m", "term_mcp_deepseek", "serve", "--host", "0.0.0.0", "--port", "8000"]

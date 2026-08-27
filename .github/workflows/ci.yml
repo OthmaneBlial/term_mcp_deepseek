@@ -1,30 +1,25 @@
-name: Tests
+name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  quality-and-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-
-      - name: Upgrade pip
-        run: python -m pip install -U pip
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Install test dependencies
-        run: pip install -r tests/requirements.txt
-
-      - name: Run tests
-        run: pytest tests/test_health.py tests/test_input_validator.py tests/test_auth_guard.py tests/test_api_integration.py::TestAPIIntegration::test_health_endpoint -v
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install --editable ".[dev]"
+      - run: python -m ruff format --check .
+      - run: python -m ruff check .
+      - run: python -m pytest

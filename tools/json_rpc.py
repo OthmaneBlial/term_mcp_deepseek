@@ -1,7 +1,11 @@
-import json
-import uuid
-from typing import Dict, Any, Optional
-from flask import request, jsonify
+"""Transport-independent JSON-RPC 2.0 dispatcher."""
+
+from __future__ import annotations
+
+import inspect
+from collections.abc import Callable, Mapping, Sequence
+from typing import Any
+
 
 class JSONRPCError(Exception):
     def __init__(self, code: int, message: str, data: Any = None):
@@ -10,103 +14,99 @@ class JSONRPCError(Exception):
         self.data = data
         super().__init__(message)
 
-class JSONRPCServer:
-    def __init__(self):
-        self.methods: Dict[str, callable] = {}
 
-    def register_method(self, name: str, method: callable):
-        """Register a method that can be called via JSON-RPC"""
+class JSONRPCServer:
+    def __init__(self) -> None:
+        self.methods: dict[str, Callable[..., Any]] = {}
+
+    def register_method(self, name: str, method: Callable[..., Any]) -> None:
         self.methods[name] = method
 
-    def handle_request(self) -> Dict[str, Any]:
-        """
-        Handle a JSON-RPC request and return the response
-        """
+    def dispatch(self, payload: Any) -> dict[str, Any] | None:
+        request_id: Any = None
+        has_id = isinstance(payload, Mapping) and "id" in payload
+        if has_id:
+            request_id = payload.get("id")
+
         try:
-            if not request.is_json:
-                raise JSONRPCError(-32700, "Parse error")
-
-            rpc_request = request.get_json()
-
-            # Validate JSON-RPC 2.0 format
-            if not isinstance(rpc_request, dict):
+            if not isinstance(payload, Mapping):
+                raise JSONRPCError(-32600, "Invalid Request")
+            if payload.get("jsonrpc") != "2.0":
                 raise JSONRPCError(-32600, "Invalid Request")
 
-            jsonrpc_version = rpc_request.get("jsonrpc")
-            if jsonrpc_version != "2.0":
+            method_name = payload.get("method")
+            if not isinstance(method_name, str) or not method_name:
                 raise JSONRPCError(-32600, "Invalid Request")
-
-            method_name = rpc_request.get("method")
-            if not isinstance(method_name, str):
-                raise JSONRPCError(-32600, "Invalid Request")
-
-            params = rpc_request.get("params", {})
-            request_id = rpc_request.get("id")
-
-            # Check if method exists
             if method_name not in self.methods:
-                raise JSONRPCError(-32601, "Method not found")
+                raise JSONRPCError(-32601, "Method not found", {"method": method_name})
 
-            # Call the method
+            params = payload.get("params", {})
             method = self.methods[method_name]
-            if isinstance(params, dict):
+            if isinstance(params, Mapping):
                 result = method(**params)
-            elif isinstance(params, list):
+            elif isinstance(params, Sequence) and not isinstance(params, (str, bytes, bytearray)):
                 result = method(*params)
             else:
-                result = method()
+                raise JSONRPCError(-32602, "Invalid params")
 
-            # Return success response
-            response = {
-                "jsonrpc": "2.0",
-                "result": result,
-                "id": request_id
-            }
+            if inspect.isawaitable(result):
+                raise JSONRPCError(-32603, "Async methods require an async dispatcher")
+            if not has_id:
+                return None
+            return create_jsonrpc_response(result, request_id)
+        except JSONRPCError as error:
+            if not has_id and isinstance(payload, Mapping):
+                return None
+            return create_jsonrpc_error(
+                error.code,
+                error.message,
+                request_id,
+                error.data,
+            )
+        except TypeError as error:
+            if not has_id:
+                return None
+            return create_jsonrpc_error(-32602, "Invalid params", request_id, str(error))
+        except Exception:
+            if not has_id:
+                return None
+            return create_jsonrpc_error(-32603, "Internal error", request_id)
 
-        except JSONRPCError as e:
-            response = {
-                "jsonrpc": "2.0",
-                "error": {
-                    "code": e.code,
-                    "message": e.message
-                },
-                "id": request_id if 'request_id' in locals() else None
-            }
-            if e.data is not None:
-                response["error"]["data"] = e.data
+    def handle_request(self, payload: Any = None) -> dict[str, Any] | None:
+        """Compatibility wrapper for legacy Flask callers and tests."""
+        if payload is None:
+            try:
+                from flask import request
 
-        except Exception as e:
-            response = {
-                "jsonrpc": "2.0",
-                "error": {
-                    "code": -32603,
-                    "message": "Internal error",
-                    "data": str(e)
-                },
-                "id": request_id if 'request_id' in locals() else None
-            }
+                if not request.is_json:
+                    return create_jsonrpc_error(-32700, "Parse error")
+                payload = request.get_json()
+            except RuntimeError:
+                return create_jsonrpc_error(-32700, "Parse error")
+            except Exception:
+                return create_jsonrpc_error(-32700, "Parse error")
+        return self.dispatch(payload)
 
-        return response
 
-def create_jsonrpc_response(result: Any, request_id: Any = None) -> Dict[str, Any]:
-    """Helper to create a JSON-RPC success response"""
-    return {
-        "jsonrpc": "2.0",
-        "result": result,
-        "id": request_id
-    }
+def create_jsonrpc_response(result: Any, request_id: Any = None) -> dict[str, Any]:
+    return {"jsonrpc": "2.0", "result": result, "id": request_id}
 
-def create_jsonrpc_error(code: int, message: str, request_id: Any = None, data: Any = None) -> Dict[str, Any]:
-    """Helper to create a JSON-RPC error response"""
-    error = {
-        "code": code,
-        "message": message
-    }
+
+def create_jsonrpc_error(
+    code: int,
+    message: str,
+    request_id: Any = None,
+    data: Any = None,
+) -> dict[str, Any]:
+    error: dict[str, Any] = {"code": code, "message": message}
     if data is not None:
         error["data"] = data
+    return {"jsonrpc": "2.0", "error": error, "id": request_id}
 
-    return {
-        "jsonrpc": "2.0",
-        "error": error,
-        "id": request_id
-    }
+
+__all__ = [
+    "JSONRPCError",
+    "JSONRPCServer",
+    "create_jsonrpc_error",
+    "create_jsonrpc_response",
+]

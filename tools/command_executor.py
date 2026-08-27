@@ -1,8 +1,9 @@
 import time
-import asyncio
-from tools.tty_output_reader import TtyOutputReader
+
 from tools.process_tracker import ProcessTracker
+from tools.tty_output_reader import TtyOutputReader
 from tools.utils import sleep
+
 
 class CommandExecutor:
     def __init__(self, shell):
@@ -21,8 +22,6 @@ class CommandExecutor:
         """
         # read any leftover output first
         TtyOutputReader.read_shell_output(self.shell)
-        before_buffer = TtyOutputReader.get_buffer()
-        before_len = len(before_buffer.split("\n"))
 
         # send the command
         self.shell.sendline(command)
@@ -54,7 +53,5 @@ class CommandExecutor:
         # final read
         TtyOutputReader.read_shell_output(self.shell)
         after_buffer = TtyOutputReader.get_buffer()
-        after_len = len(after_buffer.split("\n"))
-        lines_output = after_len - before_len
 
         return after_buffer

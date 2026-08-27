@@ -1,9 +1,10 @@
-import time, queue, threading
-from typing import Dict
+import queue
+import threading
+
 
 class EventBus:
     def __init__(self):
-        self.queues: Dict[str, queue.Queue] = {}
+        self.queues: dict[str, queue.Queue] = {}
         self.lock = threading.Lock()
 
     def get(self, session_id: str) -> queue.Queue:
@@ -20,12 +21,15 @@ class EventBus:
             q.put_nowait(event)
         except queue.Full:
             # drop oldest to keep stream live
-            try: q.get_nowait()
-            except Exception: pass
+            try:
+                q.get_nowait()
+            except Exception:
+                pass
             q.put_nowait(event)
 
     def close(self, session_id: str):
         with self.lock:
             self.queues.pop(session_id, None)
+
 
 bus = EventBus()

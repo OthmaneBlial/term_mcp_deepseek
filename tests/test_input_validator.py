@@ -1,5 +1,6 @@
 import pytest
-from tools.input_validator import InputValidator, ValidationError
+
+from tools.input_validator import InputValidator
 
 
 class TestInputValidator:
@@ -18,7 +19,7 @@ class TestInputValidator:
             "rm -rf /*",
             "dd if=/dev/zero of=/dev/sda",
             "shutdown now",
-            "sudo rm -rf /"
+            "sudo rm -rf /",
         ]
 
         for cmd in dangerous_commands:
@@ -111,12 +112,7 @@ class TestInputValidator:
 
     def test_sanitize_file_path_dangerous(self):
         """Test blocking dangerous file paths"""
-        dangerous_paths = [
-            "../../../etc/passwd",
-            "/etc/passwd",
-            "..",
-            "file/../../../root"
-        ]
+        dangerous_paths = ["../../../etc/passwd", "/etc/passwd", "..", "file/../../../root"]
 
         for path in dangerous_paths:
             with pytest.raises(ValueError):

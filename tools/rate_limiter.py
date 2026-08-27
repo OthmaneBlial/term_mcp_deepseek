@@ -3,12 +3,11 @@ Rate Limiting and Security Measures
 Provides protection against abuse and ensures fair usage
 """
 
-import time
 import threading
+import time
 from collections import defaultdict, deque
-from typing import Dict, List, Optional, Tuple
-from flask import request, g
-from config import config
+
+from flask import g, request
 
 
 class RateLimiter:
@@ -24,16 +23,13 @@ class RateLimiter:
         """
         self.rate = rate
         self.capacity = capacity
-        self.buckets: Dict[str, Dict] = {}
+        self.buckets: dict[str, dict] = {}
         self._lock = threading.Lock()
 
-    def _get_bucket(self, key: str) -> Dict:
+    def _get_bucket(self, key: str) -> dict:
         """Get or create bucket for key"""
         if key not in self.buckets:
-            self.buckets[key] = {
-                'tokens': self.capacity,
-                'last_update': time.time()
-            }
+            self.buckets[key] = {"tokens": self.capacity, "last_update": time.time()}
         return self.buckets[key]
 
     def consume(self, key: str, tokens: int = 1) -> bool:
@@ -52,16 +48,13 @@ class RateLimiter:
             now = time.time()
 
             # Add tokens based on time elapsed
-            elapsed = now - bucket['last_update']
-            bucket['tokens'] = min(
-                self.capacity,
-                bucket['tokens'] + elapsed * self.rate
-            )
-            bucket['last_update'] = now
+            elapsed = now - bucket["last_update"]
+            bucket["tokens"] = min(self.capacity, bucket["tokens"] + elapsed * self.rate)
+            bucket["last_update"] = now
 
             # Check if we have enough tokens
-            if bucket['tokens'] >= tokens:
-                bucket['tokens'] -= tokens
+            if bucket["tokens"] >= tokens:
+                bucket["tokens"] -= tokens
                 return True
 
             return False
@@ -73,14 +66,11 @@ class RateLimiter:
             now = time.time()
 
             # Update bucket
-            elapsed = now - bucket['last_update']
-            bucket['tokens'] = min(
-                self.capacity,
-                bucket['tokens'] + elapsed * self.rate
-            )
-            bucket['last_update'] = now
+            elapsed = now - bucket["last_update"]
+            bucket["tokens"] = min(self.capacity, bucket["tokens"] + elapsed * self.rate)
+            bucket["last_update"] = now
 
-            return bucket['tokens']
+            return bucket["tokens"]
 
 
 class SlidingWindowLimiter:
@@ -96,7 +86,7 @@ class SlidingWindowLimiter:
         """
         self.window_size = window_size
         self.max_requests = max_requests
-        self.requests: Dict[str, deque] = defaultdict(deque)
+        self.requests: dict[str, deque] = defaultdict(deque)
         self._lock = threading.Lock()
 
     def is_allowed(self, key: str) -> bool:
@@ -135,7 +125,7 @@ class SecurityMiddleware:
     def __init__(self):
         # Rate limiters
         self.api_limiter = RateLimiter(rate=10.0, capacity=100)  # 10 req/sec, burst 100
-        self.auth_limiter = RateLimiter(rate=5.0, capacity=20)   # 5 req/sec for auth
+        self.auth_limiter = RateLimiter(rate=5.0, capacity=20)  # 5 req/sec for auth
         self.chat_limiter = SlidingWindowLimiter(window_size=60, max_requests=30)  # 30 req/min
 
         # Blocked IPs
@@ -143,38 +133,38 @@ class SecurityMiddleware:
 
         # Suspicious patterns
         self.suspicious_patterns = [
-            r'\.\./',  # Path traversal
-            r'<script',  # XSS attempts
-            r'union.*select',  # SQL injection
-            r'1=1',  # SQL injection
-            r'eval\(',  # Code injection
-            r'exec\(',  # Code injection
+            r"\.\./",  # Path traversal
+            r"<script",  # XSS attempts
+            r"union.*select",  # SQL injection
+            r"1=1",  # SQL injection
+            r"eval\(",  # Code injection
+            r"exec\(",  # Code injection
         ]
 
     def get_client_ip(self) -> str:
         """Get client IP address"""
         # Check for forwarded headers
-        if request.headers.get('X-Forwarded-For'):
-            return request.headers.get('X-Forwarded-For').split(',')[0].strip()
-        elif request.headers.get('X-Real-IP'):
-            return request.headers.get('X-Real-IP')
+        if request.headers.get("X-Forwarded-For"):
+            return request.headers.get("X-Forwarded-For").split(",")[0].strip()
+        elif request.headers.get("X-Real-IP"):
+            return request.headers.get("X-Real-IP")
         else:
-            return request.remote_addr or 'unknown'
+            return request.remote_addr or "unknown"
 
-    def check_rate_limits(self) -> Tuple[bool, Optional[str]]:
+    def check_rate_limits(self) -> tuple[bool, str | None]:
         """Check all rate limits"""
         client_ip = self.get_client_ip()
-        endpoint = request.endpoint or 'unknown'
+        endpoint = request.endpoint or "unknown"
 
         # Check if IP is blocked
         if client_ip in self.blocked_ips:
             return False, "IP address blocked"
 
         # Apply different limits based on endpoint
-        if endpoint in ['chat', 'call_tool']:
+        if endpoint in ["chat", "call_tool"]:
             if not self.chat_limiter.is_allowed(client_ip):
                 return False, "Rate limit exceeded for chat operations"
-        elif endpoint in ['oauth.token']:
+        elif endpoint in ["oauth.token"]:
             if not self.auth_limiter.consume(client_ip):
                 return False, "Rate limit exceeded for authentication"
         else:
@@ -183,10 +173,10 @@ class SecurityMiddleware:
 
         return True, None
 
-    def check_request_size(self) -> Tuple[bool, Optional[str]]:
+    def check_request_size(self) -> tuple[bool, str | None]:
         """Check request size limits"""
         # Check Content-Length header
-        content_length = request.headers.get('Content-Length')
+        content_length = request.headers.get("Content-Length")
         if content_length:
             try:
                 size = int(content_length)
@@ -197,24 +187,28 @@ class SecurityMiddleware:
 
         # Check JSON payload size
         if request.is_json and request.get_json(silent=True):
-            json_size = len(str(request.get_json()).encode('utf-8'))
+            json_size = len(str(request.get_json()).encode("utf-8"))
             if json_size > 512 * 1024:  # 512KB limit
                 return False, "JSON payload too large"
 
         return True, None
 
-    def check_suspicious_content(self) -> Tuple[bool, Optional[str]]:
+    def check_suspicious_content(self) -> tuple[bool, str | None]:
         """Check for suspicious content patterns"""
         import re
 
         # Check URL path
-        if any(re.search(pattern, request.path, re.IGNORECASE) for pattern in self.suspicious_patterns):
+        if any(
+            re.search(pattern, request.path, re.IGNORECASE) for pattern in self.suspicious_patterns
+        ):
             return False, "Suspicious URL pattern detected"
 
         # Check query parameters
-        for key, value in request.args.items():
+        for _key, value in request.args.items():
             if isinstance(value, str):
-                if any(re.search(pattern, value, re.IGNORECASE) for pattern in self.suspicious_patterns):
+                if any(
+                    re.search(pattern, value, re.IGNORECASE) for pattern in self.suspicious_patterns
+                ):
                     return False, "Suspicious query parameter detected"
 
         # Check JSON payload
@@ -222,34 +216,38 @@ class SecurityMiddleware:
             json_data = request.get_json(silent=True)
             if json_data:
                 json_str = str(json_data)
-                if any(re.search(pattern, json_str, re.IGNORECASE) for pattern in self.suspicious_patterns):
+                if any(
+                    re.search(pattern, json_str, re.IGNORECASE)
+                    for pattern in self.suspicious_patterns
+                ):
                     return False, "Suspicious payload content detected"
 
         return True, None
 
-    def log_security_event(self, event_type: str, details: Dict):
+    def log_security_event(self, event_type: str, details: dict):
         """Log security-related events"""
         import logging
+
         logger = logging.getLogger("security")
 
         client_ip = self.get_client_ip()
-        user_agent = request.headers.get('User-Agent', 'unknown')
+        user_agent = request.headers.get("User-Agent", "unknown")
 
         log_data = {
-            'event_type': event_type,
-            'client_ip': client_ip,
-            'user_agent': user_agent,
-            'endpoint': request.endpoint,
-            'method': request.method,
-            'path': request.path,
-            **details
+            "event_type": event_type,
+            "client_ip": client_ip,
+            "user_agent": user_agent,
+            "endpoint": request.endpoint,
+            "method": request.method,
+            "path": request.path,
+            **details,
         }
 
-        if event_type == 'rate_limit':
+        if event_type == "rate_limit":
             logger.warning(f"Rate limit exceeded: {log_data}")
-        elif event_type == 'suspicious_content':
+        elif event_type == "suspicious_content":
             logger.warning(f"Suspicious content detected: {log_data}")
-        elif event_type == 'blocked_ip':
+        elif event_type == "blocked_ip":
             logger.warning(f"Blocked IP attempted access: {log_data}")
         else:
             logger.info(f"Security event: {log_data}")
@@ -257,28 +255,23 @@ class SecurityMiddleware:
     def block_ip(self, ip: str, reason: str = "Manual block"):
         """Block an IP address"""
         self.blocked_ips.add(ip)
-        self.log_security_event('ip_blocked', {
-            'blocked_ip': ip,
-            'reason': reason
-        })
+        self.log_security_event("ip_blocked", {"blocked_ip": ip, "reason": reason})
 
     def unblock_ip(self, ip: str):
         """Unblock an IP address"""
         self.blocked_ips.discard(ip)
-        self.log_security_event('ip_unblocked', {
-            'unblocked_ip': ip
-        })
+        self.log_security_event("ip_unblocked", {"unblocked_ip": ip})
 
-    def get_security_headers(self) -> Dict[str, str]:
+    def get_security_headers(self) -> dict[str, str]:
         """Get security headers for responses"""
         return {
-            'X-Content-Type-Options': 'nosniff',
-            'X-Frame-Options': 'DENY',
-            'X-XSS-Protection': '1; mode=block',
-            'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-            'Content-Security-Policy': "default-src 'self'",
-            'Referrer-Policy': 'strict-origin-when-cross-origin',
-            'Permissions-Policy': 'geolocation=(), microphone=(), camera=()'
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "X-XSS-Protection": "1; mode=block",
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            "Content-Security-Policy": "default-src 'self'",
+            "Referrer-Policy": "strict-origin-when-cross-origin",
+            "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
         }
 
 
@@ -288,24 +281,25 @@ security_middleware = SecurityMiddleware()
 
 def require_security_check(f):
     """Decorator to apply security checks to routes"""
+
     def wrapper(*args, **kwargs):
         # Rate limiting check
         allowed, reason = security_middleware.check_rate_limits()
         if not allowed:
-            security_middleware.log_security_event('rate_limit', {'reason': reason})
-            return {'error': reason}, 429
+            security_middleware.log_security_event("rate_limit", {"reason": reason})
+            return {"error": reason}, 429
 
         # Request size check
         allowed, reason = security_middleware.check_request_size()
         if not allowed:
-            security_middleware.log_security_event('request_size_exceeded', {'reason': reason})
-            return {'error': reason}, 413
+            security_middleware.log_security_event("request_size_exceeded", {"reason": reason})
+            return {"error": reason}, 413
 
         # Suspicious content check
         allowed, reason = security_middleware.check_suspicious_content()
         if not allowed:
-            security_middleware.log_security_event('suspicious_content', {'reason': reason})
-            return {'error': reason}, 400
+            security_middleware.log_security_event("suspicious_content", {"reason": reason})
+            return {"error": reason}, 400
 
         # Store security info in Flask g
         g.client_ip = security_middleware.get_client_ip()

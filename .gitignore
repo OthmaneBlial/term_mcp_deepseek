@@ -3,3 +3,12 @@ __pycache__/
 .env
 .venv
 logs/
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.server_pid

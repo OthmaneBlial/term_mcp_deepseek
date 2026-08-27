@@ -1,43 +1,70 @@
-# routes.py
-from flask import Blueprint, jsonify, request, current_app, abort
-from tools.auth import require_token  # new decorator below
+"""HTTP transport and lightweight web routes."""
+
+import json
+import queue
+import time
+
+from flask import (
+    Blueprint,
+    Response,
+    current_app,
+    jsonify,
+    request,
+    send_from_directory,
+    stream_with_context,
+)
 
 bp = Blueprint("api", __name__)
 
+
 @bp.get("/health")
 def health():
-    return jsonify(status="ok"), 200
+    return jsonify(status="ok", version=current_app.extensions["term_mcp"]["version"]), 200
+
 
 @bp.post("/chat")
-# @require_token(optional=False)  # Disabled for demo - add back for production
 def chat():
     data = request.get_json(force=True, silent=True) or {}
-    # call into mcp_server.py
     resp = current_app.mcp.handle_chat(data)
     return jsonify(resp), 200
 
+
 @bp.get("/")
 def root():
-    from flask import send_from_directory
-    return send_from_directory("static", "chat.html")
+    return send_from_directory(current_app.static_folder, "chat.html")
+
 
 @bp.get("/mcp/info")
 def mcp_info():
     return jsonify(current_app.mcp.get_info()), 200
 
-@bp.get("/stream")
-# @require_token(optional=False)  # Disabled for demo - add back for production
-def stream():
-    from flask import Response, stream_with_context, request, current_app
-    import json, time
 
+@bp.post("/mcp")
+def mcp_rpc():
+    payload = request.get_json(silent=True)
+    if payload is None:
+        return jsonify(
+            jsonrpc="2.0",
+            error={"code": -32700, "message": "Parse error"},
+            id=None,
+        ), 400
+    response = current_app.jsonrpc.dispatch(payload)
+    if response is None:
+        return "", 204
+    status = 200 if "result" in response else 400
+    return jsonify(response), status
+
+
+@bp.get("/stream")
+def stream():
     session_id = request.args.get("session_id") or "default"
     q = current_app.event_bus.get(session_id)
 
     def _sse(data: dict, event: str | None = None):
         # format: optional "event:" then "data:"; blank line to end
         lines = []
-        if event: lines.append(f"event: {event}")
+        if event:
+            lines.append(f"event: {event}")
         lines.append("data: " + json.dumps(data, ensure_ascii=False))
         lines.append("")  # terminator
         return "\n".join(lines) + "\n"
@@ -52,7 +79,7 @@ def stream():
                 try:
                     item = q.get(timeout=10)
                     yield _sse(item, event=item.get("type"))
-                except Exception:
+                except queue.Empty:
                     # heartbeat every 15s to keep proxies alive
                     now = time.time()
                     if now - last_beat >= 15:

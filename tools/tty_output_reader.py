@@ -1,14 +1,15 @@
 # tools/tty_output_reader.py
-import pexpect
 import re
 
-ANSI_ESCAPE_PATTERN = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+import pexpect
+
+ANSI_ESCAPE_PATTERN = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 
 
 class TtyOutputReader:
     """
     Manages a buffer of shell output. We'll do non-blocking reads
-    using shell.read_nonblocking(). 
+    using shell.read_nonblocking().
     """
 
     _buffer = ""
@@ -23,8 +24,8 @@ class TtyOutputReader:
                 # Append chunk
                 TtyOutputReader._buffer += chunk
                 # Strip ANSI codes and carriage returns
-                TtyOutputReader._buffer = ANSI_ESCAPE_PATTERN.sub('', TtyOutputReader._buffer)
-                TtyOutputReader._buffer = TtyOutputReader._buffer.replace('\r', '')
+                TtyOutputReader._buffer = ANSI_ESCAPE_PATTERN.sub("", TtyOutputReader._buffer)
+                TtyOutputReader._buffer = TtyOutputReader._buffer.replace("\r", "")
         except pexpect.TIMEOUT:
             pass
         except pexpect.EOF:

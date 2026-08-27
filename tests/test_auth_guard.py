@@ -1,8 +1,11 @@
-import pytest
+from tools.auth import JWTAuth
 
-def test_chat_no_auth_required(app):
-    """Chat endpoint currently doesn't require auth for demo purposes"""
-    client = app.test_client()
 
-    r = client.post("/chat", json={})
-    assert r.status_code == 200  # Auth disabled for demo
+def test_jwt_round_trip():
+    auth = JWTAuth("test-secret-that-is-at-least-32-bytes")
+    token = auth.create("developer", ttl_seconds=60)
+
+    claims = auth.verify(token)
+
+    assert claims["sub"] == "developer"
+    assert claims["iss"] == "term-mcp"
