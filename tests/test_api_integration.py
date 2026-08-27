@@ -1,3 +1,5 @@
+from term_mcp_deepseek import __version__
+
 MODERN_VERSION = "2026-07-28"
 MODERN_META = {
     "io.modelcontextprotocol/protocolVersion": MODERN_VERSION,
@@ -53,7 +55,7 @@ def test_mcp_discover_and_list_tools(client, auth_headers):
     ]
     assert (
         discovered.get_json()["result"]["_meta"]["io.modelcontextprotocol/serverInfo"]["version"]
-        == "0.9.0"
+        == __version__
     )
     assert listed.get_json()["result"]["resultType"] == "complete"
     assert {tool["name"] for tool in listed.get_json()["result"]["tools"]} == {

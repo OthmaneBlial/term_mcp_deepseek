@@ -4,6 +4,8 @@ All notable changes are documented here. The project follows [Semantic Versionin
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-08-27
+
 ### Added
 
 - Approval-first browser mission control with responsive, keyboard-accessible, local-only assets.
@@ -31,5 +33,6 @@ All notable changes are documented here. The project follows [Semantic Versionin
 
 Initial local beta before the approval-first architecture and production packaging work.
 
-[Unreleased]: https://github.com/OthmaneBlial/term_mcp_deepseek/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/OthmaneBlial/term_mcp_deepseek/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/OthmaneBlial/term_mcp_deepseek/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/OthmaneBlial/term_mcp_deepseek/releases/tag/v0.9.0

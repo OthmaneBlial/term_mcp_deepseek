@@ -1,7 +1,7 @@
 import io
 import json
 
-from term_mcp_deepseek import cli
+from term_mcp_deepseek import __version__, cli
 from term_mcp_deepseek.cli import main
 from term_mcp_deepseek.config import Settings
 from term_mcp_deepseek.stdio import serve_streams
@@ -28,7 +28,7 @@ def test_doctor_json(capsys, monkeypatch, tmp_path):
 
 def test_version_command(capsys):
     assert main(["version"]) == 0
-    assert capsys.readouterr().out.strip() == "0.9.0"
+    assert capsys.readouterr().out.strip() == __version__
 
 
 def test_token_command_generates_strong_secret(capsys):
