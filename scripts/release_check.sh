@@ -39,7 +39,7 @@ mkdir -p "$RELEASE_SOURCE" "$RELEASE_DIST" "$RELEASE_WORKSPACE"
 
 git -C "$RELEASE_ROOT" archive --format=tar HEAD | tar -xf - -C "$RELEASE_SOURCE"
 
-RELEASE_VERSION="$($RELEASE_PYTHON -c "import sys; sys.path.insert(0, '$RELEASE_SOURCE'); from term_mcp_deepseek._version import VERSION; print(VERSION)")"
+RELEASE_VERSION="$("$RELEASE_PYTHON" -c "import sys; sys.path.insert(0, '$RELEASE_SOURCE'); from term_mcp_deepseek._version import VERSION; print(VERSION)")"
 RELEASE_TAG="$(git -C "$RELEASE_ROOT" describe --tags --exact-match HEAD 2>/dev/null || true)"
 if [[ -n "$RELEASE_TAG" && "$RELEASE_TAG" != "v$RELEASE_VERSION" ]]; then
   echo "tag $RELEASE_TAG does not match package version $RELEASE_VERSION" >&2
